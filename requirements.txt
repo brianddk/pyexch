@@ -1,0 +1,6 @@
+coinbase>=2.1.0
+coinbase-advanced-py>=1.2.0
+trezor>=0.13.8
+# python_version>=3.8.2
+# pyexch @ https://github.com/brianddk/pyexch/archive/refs/heads/main.tar.gz
+# pyexch @ https://github.com/brianddk/pyexch/archive/refs/tags/0.1.tar.gz

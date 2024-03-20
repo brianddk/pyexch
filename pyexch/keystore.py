@@ -140,7 +140,6 @@ class Keystore():
                     input=kf_dict['gnupg']['enc_data'],
                     capture_output=True,
                     text = True,
-                    timeout = 5,
                 )
                 keystore = loads(proc.stdout)
             else:

@@ -69,6 +69,8 @@ class CbOa2Auth(AuthBase):
 class Exchange():
     def __init__(self, keystore):
         self.keystore = keystore
+        self._params = None
+        self._response = None
 
     def my_ipv4(self):
         return requests.get("https://v4.ident.me/").content.decode()
@@ -81,7 +83,6 @@ class Coinbase(Exchange):
         super().__init__(keystore)
         
         self._oa2_auth_handler = partial(CbOaAuthHandler, self)
-        self._params = None
         
         if keystore.get('default') == 'coinbase.v2_api':
             self.v2_client = Client(
@@ -94,7 +95,7 @@ class Coinbase(Exchange):
                 keystore.get('coinbase.v2_api.secret')
             )
 
-        elif keystore.get('default') == 'coinbase.oauth2':
+        elif keystore.get('default') == 'coinbase.oauth2' and self.keystore.get('coinbase.oauth2.token') and self.keystore.get('coinbase.oauth2.refresh'):
             self.oa2_client = OAuthClient(
                 self.keystore.get('coinbase.oauth2.token'), 
                 self.keystore.get('coinbase.oauth2.refresh')
@@ -112,7 +113,7 @@ class Coinbase(Exchange):
 
     def get(self, uri, params = None):
         self._response = None
-        uri = uri.replace('https://api.coinbase.com/', '')
+        pth = uri.replace('https://api.coinbase.com', '')
         if params:
             self._params = data_toDict(params)
         if self.keystore.get('default') == 'coinbase.oauth2':
@@ -120,11 +121,11 @@ class Coinbase(Exchange):
                 self._response = self.oa2_auth() 
             else:
                 self._response = self.oa2_refresh() 
-                self._response = self.oa2_client._get(uri, params=params)
+                self._response = self.oa2_client._get(pth, params=params)
         elif self.keystore.get('default') == 'coinbase.v2_api':    
-            self._response = self.v2_client._get(uri, params=params)
+            self._response = self.v2_client._get(pth, params=params)
         elif self.keystore.get('default') == 'coinbase.v3_api':
-            self._response = self.v3_client.get('/' + uri, params=params)
+            self._response = self.v3_client.get(pth, params=params)
         else:
             print("todo unknown get") # todo unknown get
             
@@ -133,7 +134,7 @@ class Coinbase(Exchange):
     def post(self, uri, params = None):
         data = params
         self._response = None
-        uri = uri.replace('https://api.coinbase.com/', '')
+        pth = uri.replace('https://api.coinbase.com', '')
         if data:
             self._params = data_toDict(data)
         if self.keystore.get('default') == 'coinbase.oauth2':
@@ -143,11 +144,11 @@ class Coinbase(Exchange):
                 self._response = self.oa2_revoke()
             else:
                 self._response = self.oa2_refresh() 
-                self._response = self.oa2_client._post(uri, data=data)
+                self._response = self.oa2_client._post(pth, data=data)
         elif self.keystore.get('default') == 'coinbase.v2_api':    
-            self._response = self.v2_client._post(uri, data=data)
+            self._response = self.v2_client._post(pth, data=data)
         elif self.keystore.get('default') == 'coinbase.v3_api':
-            self._response = self.v3_client.post('/' + uri, data=data)
+            self._response = self.v3_client.post(pth, data=data)
         else:
             print("todo unknown post") # todo unknown get
             

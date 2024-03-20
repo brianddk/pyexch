@@ -8,7 +8,7 @@ else:
 
 from argparse import ArgumentParser
 from json import dumps, load
-from sys import argv
+from sys import argv, stderr
 
 def main():
     if "__main__" in argv[0]: argv[0] = __file__
@@ -60,9 +60,10 @@ def main():
         if args.call == "update_keystore":
             newks = Keystore(args.params)
             ex.keystore.update(newks)
+            ex.keystore.save()
             
         elif args.call == "print_keystore":
-            ex.keystore.print(**params)
+            ex.keystore.print()
         else:
             # todo: clean this up, maybe mirror this guy as "ex.default_client" or something
             auth = ex.keystore.get('default')
@@ -78,8 +79,8 @@ def main():
         
     if(resp):
         print(dumps(resp, indent=2))
-    else:
-        print(ex._response)
+    elif ex._response != None:
+        print("Last Response:", ex._response, file=stderr)
             
 if __name__ == "__main__":
     main()
