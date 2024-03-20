@@ -56,7 +56,7 @@ Alternatively you can run it in module mode (`python -m pyexch --help`) or run t
 To install directly from GitHub, you can install from the tarball:
 
 ```
-pip install https://github.com/brianddk/pyexch/archive/refs/tags/0.0.1.tar.gz
+pip install https://github.com/brianddk/pyexch/archive/refs/tags/v0.0.1.tar.gz
 ```
 
 You won't get to documentation or templates, but all the code will land and functino
