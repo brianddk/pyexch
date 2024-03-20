@@ -37,6 +37,11 @@ NOTE: Must name either "--call" or "--url", but not both
 
 This utility allows you to use a Cryptocurrency Exchange's REST API to perform basic tasks and retrieve current and historical account data.  You will need to setup API / OAuth2 access keys in your account to use this utility.  The utility supports both GPG and Trezor-CipherKeyValue encryption.  You will need either a GPG key pair installed, or a Trezor attached.  As a fallback you can store API keys in naked JSON, but that is obviously not recommended.
 
+### Install from PIP
+
+1. Install: `pip install pyexch`
+2. Verify install: `pyexch --help`
+
 ### Install with GIT / PIP
 
 1. Get source: `git clone https://github.com/brianddk/pyexch.git`
@@ -51,7 +56,7 @@ Alternatively you can run it in module mode (`python -m pyexch --help`) or run t
 To install directly from GitHub, you can install from the tarball:
 
 ```
-pip install https://github.com/brianddk/pyexch/archive/refs/tags/0.1.tar.gz
+pip install https://github.com/brianddk/pyexch/archive/refs/tags/0.0.1.tar.gz
 ```
 
 You won't get to documentation or templates, but all the code will land and functino
