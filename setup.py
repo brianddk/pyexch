@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyexch',
-    version='0.0.1',
+    version='0.0.2',
     packages=[
         'pyexch'
     ],
@@ -11,6 +11,7 @@ setup(
         'coinbase>=2.1.0',
         'coinbase-advanced-py>=1.2.0',
         'trezor>=0.13.8',
+        'pyjson5>=1.6.6',
     ],
     entry_points={
         'console_scripts': [

@@ -5,13 +5,15 @@ else:
 
 from coinbase.wallet.client import Client, OAuthClient  # coinbase_v2
 from coinbase.rest import RESTClient                    # coinbase_v3
-from json import dumps, loads
+from pyjson5 import loads
+from json import dumps
 from requests.auth import AuthBase
 from requests.models import Response, PreparedRequest
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 from functools import partial
 import webbrowser, hmac, hashlib, time, requests
+from uuid import uuid4
 
 MINUTE = 60 # seconds
 
@@ -77,14 +79,16 @@ class Exchange():
         
     def my_ipv6(self):
         return requests.get("https://v6.ident.me/").content.decode()
-
+    def new_uuid(self):
+        return uuid4()
+        
 class Coinbase(Exchange):
     def __init__(self, keystore):
         super().__init__(keystore)
         
         self._oa2_auth_handler = partial(CbOaAuthHandler, self)
         
-        if keystore.get('default') == 'coinbase.v2_api':
+        if keystore.get('default') == 'coinbase.v2_api' and keystore.get('coinbase.v2_api.key') and keystore.get('coinbase.v2_api.secret'):
             self.v2_client = Client(
                 keystore.get('coinbase.v2_api.key'),
                 keystore.get('coinbase.v2_api.secret')
@@ -95,20 +99,20 @@ class Coinbase(Exchange):
                 keystore.get('coinbase.v2_api.secret')
             )
 
-        elif keystore.get('default') == 'coinbase.oauth2' and self.keystore.get('coinbase.oauth2.token') and self.keystore.get('coinbase.oauth2.refresh'):
+        elif keystore.get('default') == 'coinbase.oauth2' and keystore.get('coinbase.oauth2.token') and keystore.get('coinbase.oauth2.refresh'):
             self.oa2_client = OAuthClient(
-                self.keystore.get('coinbase.oauth2.token'), 
-                self.keystore.get('coinbase.oauth2.refresh')
+                keystore.get('coinbase.oauth2.token'), 
+                keystore.get('coinbase.oauth2.refresh')
             )
 
             self.oa2_req_auth = CbOa2Auth(
-                self.keystore.get('coinbase.oauth2.token'),
+                keystore.get('coinbase.oauth2.token'),
             )
 
-        elif keystore.get('default') == 'coinbase.v3_api':
+        elif keystore.get('default') == 'coinbase.v3_api' and keystore.get('coinbase.v3_api.key') and keystore.get('coinbase.v3_api.secret'):
             self.v3_client = RESTClient(
-                api_key = self.keystore.get('coinbase.v3_api.key'), 
-                api_secret = self.keystore.get('coinbase.v3_api.secret'),
+                api_key = keystore.get('coinbase.v3_api.key'), 
+                api_secret = keystore.get('coinbase.v3_api.secret'),
             )
 
     def get(self, uri, params = None):

@@ -28,6 +28,7 @@ NOTE: Must name either "--call" or "--url", but not both
 - [x] Add OAuth2, API_v2 and API_v3 support for Coinbase
 - [x] Tag a (beta) release to reduce the nead to use the HEAD
 - [x] Release to PyPi for better CDN support
+- [x] Use [JSON5][g] for `load` and `loads` operations
 - [ ] Add PUT and DELETE methods for Coinbase
 - [ ] Add Kraken as a supported Exchange
 - [ ] Add Binance as a supported Exchange (from USA ?!?)
@@ -36,11 +37,6 @@ NOTE: Must name either "--call" or "--url", but not both
 ## Install and Initial Setup
 
 This utility allows you to use a Cryptocurrency Exchange's REST API to perform basic tasks and retrieve current and historical account data.  You will need to setup API / OAuth2 access keys in your account to use this utility.  The utility supports both GPG and Trezor-CipherKeyValue encryption.  You will need either a GPG key pair installed, or a Trezor attached.  As a fallback you can store API keys in naked JSON, but that is obviously not recommended.
-
-### Install from PIP
-
-1. Install: `pip install pyexch`
-2. Verify install: `pyexch --help`
 
 ### Install with GIT / PIP
 
@@ -53,13 +49,18 @@ Alternatively you can run it in module mode (`python -m pyexch --help`) or run t
 
 ### Install without GIT
 
-To install directly from GitHub, you can install from the tarball:
+To install the most recent edition directly from GitHub tarball:
 
 ```
-pip install https://github.com/brianddk/pyexch/archive/refs/tags/v0.0.1.tar.gz
+pip install https://github.com/brianddk/pyexch/archive/refs/heads/main.tar.gz
 ```
 
-You won't get to documentation or templates, but all the code will land and functino
+You won't get to documentation or templates, but all the code will land and function 
+
+### Install last release from PIP
+
+1. Install: `pip install pyexch`
+2. Verify install: `pyexch --help`
 
 ## Building a Keystore
 
@@ -106,13 +107,13 @@ Template:
 With both the GnuPG and OAuth2 templates, the `update_keystore` call will prompt for the `null` fields, and encrypt the resultant merge with GnuPG
 
 ```
-pyexch --call update_keystore --params coinbase_oauth2.json --keystore gnupg_ks.json --auth coinbase.auth2
+pyexch --call update_keystore --params coinbase_oauth2.json --keystore gnupg_ks.json --auth coinbase.oauth2
 ```
 
 If you choose OAuth2, you will need to create / authorize your app to get a grant token
 
 ```
-pyexch --uri https://www.coinbase.com/oauth/authorize --keystore gnupg_ks.json --auth coinbase.auth2
+pyexch --uri https://www.coinbase.com/oauth/authorize --keystore gnupg_ks.json --auth coinbase.oauth2
 ```
 
 This will launch your web-browser and web-server to service the request and store the keys in your keystore.  You can display the keys on console using `print_keystore` call.  Note that since this get takes secret params, the `auth_url` is treated special and the parameters are built internally for processing to avoid the need for an encrypted `params.json` file.
@@ -153,3 +154,4 @@ pyexch --call get_buy_price --params params.json --keystore gnupg_ks.json
 [d]: https://coinbase.github.io/coinbase-advanced-py/coinbase.rest.html#module-coinbase.rest.accounts (client v3)
 [e]: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/api-users#show-authorization-information
 [f]: https://github.com/coinbase/coinbase-python#usage
+[g]: https://github.com/Kijewski/pyjson5 (JSON5)

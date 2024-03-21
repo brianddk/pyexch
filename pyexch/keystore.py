@@ -1,4 +1,5 @@
-from json import load, loads, dump, dumps # todo move to JSON5
+from pyjson5 import load, loads
+from json import dump, dumps
 from subprocess import run
 from collections.abc import Mapping
 from base64 import b64decode, b64encode

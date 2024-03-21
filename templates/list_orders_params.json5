@@ -1,0 +1,8 @@
+// https://docs.cloud.coinbase.com/advanced-trade-api/reference/retailbrokerageapi_gethistoricalorders
+
+{
+  "order_status": "OPEN",
+  "product_id": "BTC-USD",
+}
+
+

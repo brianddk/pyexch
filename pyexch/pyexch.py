@@ -7,7 +7,8 @@ else:
     from keystore import Keystore
 
 from argparse import ArgumentParser
-from json import dumps, load
+from pyjson5 import load
+from json import dumps
 from sys import argv, stderr
 
 def main():
@@ -52,6 +53,12 @@ def main():
     if args.params:
         with open(args.params, 'r') as pj:
             params = load(pj)
+
+    internals = [
+        'my_ipv4',
+        'my_ipv6',
+        'new_uuid'
+    ]
                 
     ex = create(args.keystore, args.auth)
     
@@ -64,6 +71,9 @@ def main():
             
         elif args.call == "print_keystore":
             ex.keystore.print()
+        elif args.call in internals:
+            method = getattr(ex, args.call)
+            print(method())
         else:
             # todo: clean this up, maybe mirror this guy as "ex.default_client" or something
             auth = ex.keystore.get('default')

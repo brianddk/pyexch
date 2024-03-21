@@ -1,0 +1,16 @@
+// https://docs.cloud.coinbase.com/advanced-trade-api/reference/retailbrokerageapi_postorder
+
+{
+  "client_order_id": "d6e41247-9b02-4192-9745-92f7fcc834b9", // pyexch --call new_uuid
+  "product_id": "BTC-USD",
+  "side": "BUY",
+  "order_configuration": {
+    "limit_limit_gtc": {
+      "base_size": "0.000030",
+      "limit_price": "45000",
+      "post_only": true
+    }
+  }
+}
+
+

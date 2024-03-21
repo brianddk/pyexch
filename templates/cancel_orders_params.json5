@@ -1,0 +1,7 @@
+// https://docs.cloud.coinbase.com/advanced-trade-api/reference/retailbrokerageapi_cancelorders
+
+{
+  "order_ids": ["1889ed02-307d-4b95-80a8-c1c63c8f39c8"],
+}
+
+
