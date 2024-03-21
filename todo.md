@@ -1,13 +1,13 @@
 # Todo List
 
 - [x] Publish to github
+- [x] Add requirements.txt
+- [x] [Publish on PyPi][c]
+- [x] Use [JSON5][b] for `load` and `loads` operations
 - [ ] Add python `unittest`
 - [ ] Add python static analysis tool
-- [ ] Add requirements.txt
 - [ ] Add PyPi and Travis banners
-- [ ] [Publish on PyPi][c]
 - [ ] Use [OrderedDict][a] on Keystore.save() to beutify JSON ordering
-- [ ] Use [JSON5][b] for `load` and `loads` operations
 - [ ] Fix ArgParse "NOTE" and `mutually_exlusive_group`
 - [ ] Determine why the [Revoke URI][d] isn't working.
 - [ ] Determine why `CbV2Auth` isn't working on authorized URLs.
