@@ -1,9 +1,9 @@
 if __package__:
-    from .exchange import create    
+    from .exchange import Exchange    
     from .keystore import Keystore
 
 else:
-    from exchange import create    
+    from exchange import Exchange    
     from keystore import Keystore
 
 from argparse import ArgumentParser
@@ -60,7 +60,7 @@ def main():
         'new_uuid'
     ]
                 
-    ex = create(args.keystore, args.auth)
+    ex = Exchange.create(args.keystore, args.auth)
     
     if args.call:
         resp = ex._response = None
@@ -71,6 +71,9 @@ def main():
             
         elif args.call == "print_keystore":
             ex.keystore.print()
+        elif args.call in ['sort_keystore', 'sort_keyfile']:
+            method = getattr(ex.keystore, args.call)
+            method(args.params)
         elif args.call in internals:
             method = getattr(ex, args.call)
             print(method())

@@ -69,6 +69,21 @@ class CbOa2Auth(AuthBase):
         return request
         
 class Exchange():
+
+    @classmethod
+    def create(cls, keystore_json, default = None):
+        keystore = Keystore(keystore_json)
+        if default:
+            keystore.set('default', default)
+        
+        if keystore.get('default'):
+            default = keystore.get('default')
+        
+        if default and default.split('.')[0] == 'coinbase' or keystore.get('coinbase'):
+            return Coinbase(keystore)
+        else:
+            pass # todo Throw exception
+
     def __init__(self, keystore):
         self.keystore = keystore
         self._params = None
@@ -272,21 +287,7 @@ def run_server(port, handler):
     httpd = HTTPServer(server_address, handler)
     print(f"Server listening on port {port}...")
     httpd.handle_request()
-        
-def create(keystore_json, default = None):
-    keystore = Keystore(keystore_json)
-    if default:
-        keystore.set('default', default)
-    
-    if keystore.get('default'):
-        default = keystore.get('default')
-    
-    if default and default.split('.')[0] == 'coinbase' or keystore.get('coinbase'):
-        return Coinbase(keystore)
-    else:
-        pass # todo Throw exception
-
-            
+                    
 def data_toDict(data):
     if type(data) is dict:
         return data

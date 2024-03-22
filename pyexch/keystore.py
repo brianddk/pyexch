@@ -28,7 +28,7 @@ class Keystore():
     def __init__(self, keystore_json = None):
         self._tzclient = None
         self.closed    = False
-        self._keyfile  = None
+        self._filename  = None
         if(keystore_json):
             self.load(keystore_json)            
         
@@ -59,7 +59,7 @@ class Keystore():
         
     def close(self):
         self.closed = True
-        self._keyfile = None
+        self._filename = None
         if self._tzclient:
             self._tzclient.close()
             self._tzclient = None
@@ -69,12 +69,9 @@ class Keystore():
             return
             
         assert not self.closed, "Can't save a closed keystore"
-        
-        with open(self._keyfile, 'r') as kf:
-            kf_dict = load(kf)
-            
-        if kf_dict['format'] == 'gnupg':
-            recp = kf_dict['gnupg']['recipient']
+                    
+        if self._keyfile['format'] == 'gnupg':
+            recp = self._keyfile['gnupg']['recipient']
             
             proc = run(f"gpg --encrypt --recipient {recp} --armor".split(' '), 
                 input = dumps(self._keystore),
@@ -83,30 +80,30 @@ class Keystore():
             )
 
             # dict.json.gpg.asc
-            kf_dict['gnupg']['enc_data'] = proc.stdout
+            self._keyfile['gnupg']['enc_data'] = proc.stdout
         
-        if kf_dict['format'] == 'trezor':
-            self._opentz(kf_dict)
+        if self._keyfile['format'] == 'trezor':
+            self._opentz()
             
             ses = self._tzclient.session_id.hex()
-            aod = kf_dict['trezor'].get('ask_on_decrypt', True)            
-            aoe = kf_dict['trezor'].get('ask_on_encrypt', False)
-            kf_dict['trezor']['ask_on_decrypt'] = aod
-            kf_dict['trezor']['ask_on_encrypt'] = aoe
-            kf_dict['trezor']['last_session'] = ses
-            path = parse_path(kf_dict['trezor'].get('path'))
-            key = kf_dict['trezor'].get('key')
+            aod = self._keyfile['trezor'].get('ask_on_decrypt', True)            
+            aoe = self._keyfile['trezor'].get('ask_on_encrypt', False)
+            self._keyfile['trezor']['ask_on_decrypt'] = aod
+            self._keyfile['trezor']['ask_on_encrypt'] = aoe
+            self._keyfile['trezor']['last_session'] = ses
+            path = parse_path(self._keyfile['trezor'].get('path'))
+            key = self._keyfile['trezor'].get('key')
             node = get_public_node(self._tzclient, path)
             fgr = dword_to_hex(node.root_fingerprint)
 
-            assert 'zlib' == kf_dict['trezor'].get('compression')
-            if kf_dict['trezor'].get('fingerprint'):
-                assert fgr == kf_dict['trezor'].get('fingerprint')
-            kf_dict['trezor']['fingerprint'] = fgr
+            assert 'zlib' == self._keyfile['trezor'].get('compression')
+            if self._keyfile['trezor'].get('fingerprint'):
+                assert fgr == self._keyfile['trezor'].get('fingerprint')
+            self._keyfile['trezor']['fingerprint'] = fgr
 
             # dict.json
             bdec = dumps(self._keystore, separators=(',',':')).encode()
-            kf_dict['trezor']['crc32'] = dword_to_hex(crc32(bdec))            
+            self._keyfile['trezor']['crc32'] = dword_to_hex(crc32(bdec))            
             
             # dict.json.zlib
             zdec = compress(bdec)
@@ -114,31 +111,31 @@ class Keystore():
             
             # dict.json.zlib.pad
             dec, pad = tz_pad(zdec)
-            kf_dict['trezor']['hdr_padding'] = pad
+            self._keyfile['trezor']['hdr_padding'] = pad
             
             # dict.json.zlib.pad.cipherkv
             enc = encrypt_keyvalue(self._tzclient, path, key, dec, aoe, aod)
 
             # dict.json.zlib.pad.cipherkv.b64
-            kf_dict['trezor']['enc_data'] = b64encode(enc).decode()
+            self._keyfile['trezor']['enc_data'] = b64encode(enc).decode()
         
-        if kf_dict['format'] == 'json':
-            kf_dict = self._keystore
+        if self._keyfile['format'] == 'json':
+            self._keyfile = self._keystore
 
-        with open(self._keyfile, 'w') as kf:
-            dump(kf_dict, kf, indent=2, sort_keys=True)
+        with open(self._filename, 'w') as kf:
+            dump(self._keyfile, kf, indent=2)
         
         self._dirty = False
     
     def load(self, keystore_json):
         with open(keystore_json, 'r') as kf:
-            kf_dict = load(kf)
+            self._keyfile = load(kf)
 
-        self._keyfile = keystore_json
-        if kf_dict['format'] == 'gnupg':
-            if kf_dict['gnupg'].get('enc_data'):
+        self._filename = keystore_json
+        if self._keyfile['format'] == 'gnupg':
+            if self._keyfile['gnupg'].get('enc_data'):
                 proc = run(f"gpg --decrypt".split(' '), 
-                    input=kf_dict['gnupg']['enc_data'],
+                    input=self._keyfile['gnupg']['enc_data'],
                     capture_output=True,
                     text = True,
                 )
@@ -146,29 +143,29 @@ class Keystore():
             else:
                 keystore = dict()
         
-        if kf_dict['format'] == 'trezor':
-            if kf_dict['trezor'].get('enc_data'):
-                self._opentz(kf_dict)
-                aod = kf_dict['trezor'].get('ask_on_decrypt', True)            
-                aoe = kf_dict['trezor'].get('ask_on_encrypt', False)
-                path = parse_path(kf_dict['trezor'].get('path'))
+        if self._keyfile['format'] == 'trezor':
+            if self._keyfile['trezor'].get('enc_data'):
+                self._opentz()
+                aod = self._keyfile['trezor'].get('ask_on_decrypt', True)            
+                aoe = self._keyfile['trezor'].get('ask_on_encrypt', False)
+                path = parse_path(self._keyfile['trezor'].get('path'))
 
                 # dict.json.zlib.pad.cipherkv.b64
-                enc = b64decode(kf_dict['trezor'].get('enc_data').encode())
-                key = kf_dict['trezor'].get('key')
+                enc = b64decode(self._keyfile['trezor'].get('enc_data').encode())
+                key = self._keyfile['trezor'].get('key')
                 node = get_public_node(self._tzclient, path)
                 fgr = dword_to_hex(node.root_fingerprint)
-                assert fgr == kf_dict['trezor'].get('fingerprint')
+                assert fgr == self._keyfile['trezor'].get('fingerprint')
 
                 # dict.json.zlib.pad.cipherkv
                 zdec = decrypt_keyvalue(self._tzclient, path, key, enc, aoe, aod)
                 
                 # dict.json.zlib.pad
-                zdec = tz_strip(zdec, kf_dict['trezor'].get('hdr_padding'))
+                zdec = tz_strip(zdec, self._keyfile['trezor'].get('hdr_padding'))
                 
                 # dict.json.zlib
                 dec = decompress(zdec)
-                assert kf_dict['trezor'].get('crc32') == dword_to_hex(crc32(dec))
+                assert self._keyfile['trezor'].get('crc32') == dword_to_hex(crc32(dec))
                 
                 # dict.json
                 keystore = loads(dec.decode())
@@ -176,40 +173,25 @@ class Keystore():
             else:
                 keystore = dict()
         
-        if kf_dict['format'] == 'json':
-            keystore = kf_dict
+        if self._keyfile['format'] == 'json':
+            keystore = self._keyfile
+        
         
         self._keystore = keystore
         self._dirty = False
     
     def print(self, show_private = True):
         # Todo enable show_private = False
-        print(dumps(self._keystore, indent=2, sort_keys=True))
-
-    def _update(self, old_obj, new_obj, path=""):
-        for key, val in new_obj.items():
-            if isinstance(val, Mapping):
-                old_obj[key] = self._update(old_obj.get(key, {}), val, f"{path}{key}.")
-            else:
-                prompt = path+key
-                if val == None:
-                    val = input(f"Enter {prompt}: ")
-                    if prompt == "coinbase.v3_api.secret":
-                        val = val.replace("\\n", "\n")
-                    if key == "auth_ips":
-                        val = [ip.strip() for ip in val.split(',')]                
-                old_obj[key] = val
-
-        return old_obj
+        print(dumps(self._keystore, indent=2))
         
     def update(self, ks_cls):
-        self._keystore = self._update(self._keystore, ks_cls._keystore)
+        self._keystore = update(self._keystore, ks_cls._keystore)
         self._dirty = True
         
-    def _opentz(self, kf_dict):
-        pen = kf_dict['trezor'].get('passphrase_protection', False)
-        pod = kf_dict['trezor'].get('passphrase_on_device', False)
-        ses = kf_dict['trezor'].get('last_session')
+    def _opentz(self):
+        pen = self._keyfile['trezor'].get('passphrase_protection', False)
+        pod = self._keyfile['trezor'].get('passphrase_on_device', False)
+        ses = self._keyfile['trezor'].get('last_session')
         if ses: ses = bytes.fromhex(ses)
         if pen:
             ui = ClickUI(passphrase_on_host=not pod)
@@ -223,6 +205,32 @@ class Keystore():
         if pen:  
             assert self._tzclient.features.passphrase_protection , "Passphrase requested in Keystore, but disabled on Trezor"
     
+    def sort_keystore(self, json_file):
+        self.save()
+        with open(json_file, 'r') as jf:
+            template = load(jf)
+            
+        before_len = len(dumps(self._keystore))
+        reordered_dict = sort_dict(self._keystore, template)
+        after_len = len(dumps(reordered_dict))
+        
+        assert before_len == after_len, "The length changed after the sort, something is now missing"
+        self._keystore = reordered_dict
+        self.save(force = True)
+
+    def sort_keyfile(self, json_file):
+        self.save()
+        with open(json_file, 'r') as jf:
+            template = load(jf)
+
+        before_len = len(dumps(self._keyfile))
+        reordered_dict = sort_dict(self._keyfile, template)
+        after_len = len(dumps(reordered_dict))
+
+        assert before_len == after_len, "The length changed after the sort, something is now missing"
+        self._keyfile = reordered_dict
+        self.save(force = True)
+        
 
 def tz_pad(zdec):
     pad = (16 - len(zdec) % 16) % 16
@@ -231,3 +239,29 @@ def tz_pad(zdec):
 
 def tz_strip(dec, pad):
     return dec[pad:]
+    
+def sort_dict(input_dict, template):
+    if isinstance(input_dict, dict):
+        reordered_dict = {}
+        for key in template:
+            if key in input_dict:
+                reordered_dict[key] = sort_dict(input_dict[key], template[key])
+        return reordered_dict
+    else:
+        return input_dict    
+
+def update(self, old_obj, new_obj, path=""):
+    for key, val in new_obj.items():
+        if isinstance(val, Mapping):
+            old_obj[key] = update(old_obj.get(key, {}), val, f"{path}{key}.")
+        else:
+            prompt = path+key
+            if val == None:
+                val = input(f"Enter {prompt}: ")
+                if prompt == "coinbase.v3_api.secret":
+                    val = val.replace("\\n", "\n")
+                if key == "auth_ips":
+                    val = [ip.strip() for ip in val.split(',')]                
+            old_obj[key] = val
+
+    return old_obj
