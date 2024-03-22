@@ -1,0 +1,58 @@
+// These are all the supported fields for Trezor keystores in pyexch v0.0.1 and earlier.
+//   Obviously these are example values and some will need to be changed to fit your needs.
+//   Since Trezor CipherKeyValue is an encrypted keystore it is a good one to use without 
+//   fear of getting compromised.  Obviously, you will need to think about whether or not
+//   to use a passphrase, and how and where you want prompting.
+//
+// NOTE: If you copy this template to use as a keystore on a keystore_update call, ensure
+//   ensure you remove the fields at the bottom that are updated and maintained by pyexch.
+
+{
+  // Possible formats are {json, trezor, gnupg}, but all internal stores are JSON in memory
+  "format": "trezor",
+
+  // Information needed by Trezor CipherKeyVale to encrypt / decrypt this keystore
+  "trezor": {
+
+    // The label presented when "ask" is enabled
+    "key": "PyExch Keystore",
+    
+    // The SLIP-16 derivation used for CipherKeyValue
+    "path": "m/10016'/0",
+    
+    // Enable passphrase protection?
+    "passphrase_protection": true,
+    
+    // If passphrase is used, enter it on device or console / environ?
+    "passphrase_on_device": false,
+    
+    // Should Trezor Prompt on decrypt?  Can't change once loaded
+    "ask_on_decrypt": true,
+    
+    // Should Trezor Prompt on encrypt?  Can't change once loaded    
+    "ask_on_encrypt": false,
+    
+    // =====================================================================================================
+    // The fields below this line are updated and maintained by pyexch for state storage.  No need to update 
+    // =====================================================================================================
+
+    // Always zlib right now, really just documenting for recovery
+    "compression": "zlib",
+    
+    // Last good session, useful when running commands back to back to avoid passphrase prompting
+    "last_session": "49a485d1e4e7de493b6eedd564ecfd6bdc3b57c15bade1ac302924257e54062e",
+    
+    // Pay attention to this.  You can use it to validate your passphrase and ensure nothing changes
+    "fingerprint": "00e9b0ff",
+    
+    // The crc32 of the decrypted JSON object to ensure everything went OK.
+    "crc32": "21438886",
+    
+    // CipherKeyValue needs padding.  This is how many bytes to chop off the front after decryption for zlib.
+    "hdr_padding": 2,
+    
+    // json.zlib.pad.cipherkv.base64 - Yes, those are the levels of encoding to unwind !
+    "enc_data": "QVQCJL+cryGtIca422/NhCwmIiWdLJALztuNl91e0Whb/bvnAgzPsY7OmngmIxXrcFmRBevCdGMSGVmvjZSkUAQO/lzF4D6+aOnz2cWdQuADh5jmJZdQfHCZzb+zJaj1IYGUZGnHVpoMkKShawp2pQd8p7azLWVtRSydgL5h3TLVlmUiYW0bflsIo1QqwMUh0cU4iP6+25ix5aQn80RETiHBXD8eBSCxX7en1R1nOtILtMDw60HFEL0IdxgNH1b/heqhX0qIgsxKDGMDmJuXiut3l4T7yrJiHU2n31UU9+N2+V6TnPOcbnoy4YzgYqYi1mHweBVA5CvFbBQq/6XwepoxSJyXBaklyiLHKTYSqHYXFlvwABOH1FNeGMResMd1PecnNEeBHKscgmXikKgaZCCnwNTe/iiAcIrhSgS0Z4MjRfCPLwxJBJRfQUCdceEtvIc4k/PFdT2UPOl/qUl/fvVMUomDFYIBKYjh1rs6Qyh9RxtGD54TirPsizaUjECxfdJDeTTuRd1dgumfIBkzYsNkFwNtBjYGYkkO7uTR3Ogj2yEqb65AqD6GDK+Gk5zPgqap78Is6DItIRHBuB6wG0EjX17f0RoMkSKCJbCclPTYXn/WF7gkbkYhG+u2vkG+tWz7CHM0hUDFzjGQYXU9ll46arko9SYeqAZp5LulGxJoVRyEAKVQWfjKQq69FiX6ih/zKINw5ny22wdaufy9hiqmoKKpMUnkWgBS+NdZRfR7Jn+XcII4IyT898ENZOIuP5sdpkl0kdbYr2T9jbqYDAwzsNxnz1UqNbUl4Xt6OPKYLk3TpZgVo3hqpH89d69ZkTiLqRZNYaHL1bHnPHeLs6RQfPKsay/8l7U0OZVn5KJpandXSieEz/xemPWWqXgeMDFMCYJ1L073sA3rlekmJvesSM7WNP0EFbV/h3oZ1FYF9o6gayydjp0ZyaYldWb/giFr5LudziNnYjXvKvgRHLoY/sOR//7Rls3xbZ2IYVr5+t89mg/ZxLLam4uBukoVYy+wufD+4BuX3v2wYxmXLEPq2Q9qTOUVxI7VTmO0G4c0Kd0xGamNU8Be+4gGQxEuBhpRQhMhuWtTE2r5HUCOiQYor4MuVK02LPtI9ZzX1F3S8i91+tIqGOkXLuOhet5dbrUVGi21KnIlKkwrWhHW0w==",    
+  }
+}
+

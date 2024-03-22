@@ -1,0 +1,26 @@
+// These are all the supported fields for GnuPG keystores in pyexch v0.0.1 and earlier.
+//   Obviously these are example values and some will need to be changed to fit your needs.
+//   Since GnuPG is an encrypted keystore it is a good one to use without fear of getting
+//   compromised.  Obviously, you will need to create a good GPG key and maintain it.
+//
+// NOTE: If you copy this template to use as a keystore on a keystore_update call, ensure
+//   ensure you remove the enc_data example, and update the recipient field.
+
+{
+  // Possible formats are {json, trezor, gnupg}, but all internal stores are JSON in memory
+  "format": "gnupg",
+  
+  // Information needed by GnuPG to encrypt / decrypt this keystore
+  "gnupg": {
+    
+    // The key that can decrypt this keystore.  Should be a key-id / uid that has private data in gpg.
+    "recipient": "TYPE_YOUR_GPG_PUBLIC_KEY_HERE",
+    
+    // =================================================================================================
+    // The gnupg.enc_data field is updated and maintained by pyexch for state storage, don't modify!
+    // =================================================================================================
+
+    // The internal encrypted data.  If you decrypt it you will just find a JSON keystore object
+    "enc_data": "-----BEGIN PGP MESSAGE-----\n\nGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEF\nIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGH\nKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJ\nMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKL\nOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMN\nQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOP\nSTUVWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOPQR\nUVWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOPQRST\nWXYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOPQRSTUV\nYZabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOPQRSTUVWX\nabcdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ\ncdefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab\nefghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcd\nghijklmnopqrstuvwxyz+/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef\nijklm\n-----END PGP MESSAGE-----\n",
+  }
+}

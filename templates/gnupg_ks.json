@@ -1,6 +1,0 @@
-{
-  "format": "gnupg",
-  "gnupg": {
-    "recipient": "TYPE_YOUR_GPG_PUBLIC_KEY_HERE"
-  }
-}

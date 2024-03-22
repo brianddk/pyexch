@@ -4,6 +4,9 @@
 - [x] Add requirements.txt
 - [x] [Publish on PyPi][c]
 - [x] Use [JSON5][b] for `load` and `loads` operations
+- [x] Add Trezor templates
+- [ ] Add JSON templates
+- [ ] Add annotated GnuPG / Trezor / JSON files as docs
 - [ ] Add python `unittest`
 - [ ] Add python static analysis tool
 - [ ] Add PyPi and Travis banners

@@ -1,0 +1,91 @@
+// These are all the supported fields for internal keystores in pyexch v0.0.1 and earlier.
+//   Obviously these are example values and some will need to be changed to fit your needs.
+//   You can populate real values using the {"format":"json"}, but I'd advise you use one
+//   of the encrypted keystores like like "trezor" or "gnupg"
+//
+// NOTE: If you copy this template to use in a keystore_update call, keep ONLY the fields
+//   you need to update.  You won't need any of the fields that are updated or maintained
+//   by pyexch, since they will be updated at runtime.  Setting a field to null 
+//   { "field": null } will trigger pyexch to prompt on console.  
+
+{
+  // Possible formats are {json, trezor, gnupg}, but all internal stores are JSON
+  "format": "json",
+  
+  // Either {coinbase.oauth2, coinbase.v2_api, coinbase.v3_api}.  Used if --auth is not an arg
+  "default": "coinbase.oauth2",
+  
+  // Future values will be {coinbase, kraken, binance}, but presently only coinbase
+  "coinbase": {
+    
+    // Aquire from "My OAuth2 Applications" at https://www.coinbase.com/settings/api
+    "oauth2": {
+      
+      // The URLs for new authorizations, token refresh, and revocation.  Use "api." not "www."
+      "auth_url": "https://api.coinbase.com/oauth/authorize",
+      "token_url": "https://api.coinbase.com/oauth/token",
+      "revoke_url": "https://api.coinbase.com/oauth/token",
+      
+      // This will be the URL that pyexch will attempt to host a callback server at
+      "redirect_url": "http://localhost:8000/callback",
+      
+      // The client ID you received after registering your application
+      "id": "6789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345",
+      
+      // The client secret you received after registering your application.
+      "secret": "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0",
+      
+      // Scopes: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/permissions-scopes#supported-scopes
+      "scope": "wallet:user:read,wallet:accounts:read",
+      
+      // =================================================================================================
+      // The coinbase.oauth2 fields below this line are updated and maintained by pyexch for state storage 
+      // =================================================================================================
+      
+      // The unixtime when this "token" expires, returned in the registration / refresh process
+      "expiration": 1710039564,
+      
+      // The access_token returned by the registration / refresh process
+      "token": "CDEFGHIJKLMN*+,-.:;<=>?@[]^_`{|}~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr",
+      
+      // The refresh_token required to perform a refresh of an expired access_token
+      "refresh": "^_`{|}~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&'()*+,-.:;<=>",
+    },
+    
+    // Aquire from "API Keys" at https://www.coinbase.com/settings/api
+    "v2_api": {
+      
+      // Your API key used in CB-ACCESS-KEY header
+      "key": "uvwxyz123456789A",
+      
+      // Your Secret key used in the HMAC sign operation to create CB-ACCESS-SIGN header
+      "secret": "PQRSTUVWXYZabcdefghijkmnopqrstuv",
+
+      // List of IPv4 or IPv6 IPs that you whitelisted in your API key generation (you should limit these)
+      "auth_ips": [
+        "3456:789a:bcde:f012:3456:789a:bcde:f012",
+        "bcde:f012:3456:789a:bcde:f012:3456:789a",
+        "193.194.195.196",
+        "200.201.202.203"
+      ]
+    },
+    
+    // Aquire from "Trading key" at https://portal.cloud.coinbase.com/access/api
+    "v3_api": {
+      
+      // API Key used to build the JWT Token for the Authorization header
+      "key": "organizations/12345678-9abc-def0-1234-56789abcdef0/apiKeys/56789abc-def0-1234-5678-9abcdef01234",
+      
+      // API Key used to build the JWT Token for the Authorization header
+      "secret": "-----BEGIN EC PRIVATE KEY-----\nxyz+/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvw\nz+/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy\n/0123456789ABCDEFGHIJKLMNOPQRSTUVWXY\n-----END EC PRIVATE KEY-----\n",
+
+      // List of IPv4 or IPv6 IPs that you whitelisted in your API key generation (you should limit these)
+      "auth_ips": [
+        "3456:789a:bcde:f012:3456:789a:bcde:f012",
+        "bcde:f012:3456:789a:bcde:f012:3456:789a",
+        "193.194.195.196",
+        "200.201.202.203"
+      ]
+    },
+  }
+}
