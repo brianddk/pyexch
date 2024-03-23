@@ -24,8 +24,6 @@ optional arguments:
 
 NOTE: Must name either "--call" or "--url", but not both, and "keystore.json"
 is assumed if "--keystore" is not named
-
-Keystore file "keystore.json" not found
 ```
 
 ## Future Plans
