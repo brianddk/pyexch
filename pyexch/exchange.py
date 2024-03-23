@@ -173,6 +173,46 @@ class Coinbase(Exchange):
             
         return data_toDict(self._response)
         
+    def put(self, uri, params = None):
+        data = params
+        self._response = None
+        pth = uri.replace('https://api.coinbase.com', '')
+        if data:
+            self._params = data_toDict(data)
+        if self.keystore.get('default') == 'coinbase.oauth2':
+            self._response = self.oa2_refresh() 
+            self._response = self.oa2_client._put(pth, data=data)
+        elif self.keystore.get('default') == 'coinbase.v2_api':    
+            self._response = self.v2_client._put(pth, data=data)
+        elif self.keystore.get('default') == 'coinbase.v3_api':
+            self._response = self.v3_client.put(pth, data=data)
+        else:
+            print("todo unknown post") # todo unknown get
+            
+        return data_toDict(self._response)
+        
+    def delete(self, uri, params = None):
+        self._response = None
+        pth = uri.replace('https://api.coinbase.com', '')
+
+        # No CB endpoint is using params or data on delete
+        #  If added back, remember to put it in the calls below.
+        # data = params
+        # if data:
+            # self._params = data_toDict(data)
+
+        if self.keystore.get('default') == 'coinbase.oauth2':
+            self._response = self.oa2_refresh() 
+            self._response = self.oa2_client._delete(pth)
+        elif self.keystore.get('default') == 'coinbase.v2_api':    
+            self._response = self.v2_client._delete(pth)
+        elif self.keystore.get('default') == 'coinbase.v3_api':
+            self._response = self.v3_client.delete(pth)
+        else:
+            print("todo unknown post") # todo unknown get
+            
+        return data_toDict(self._response)
+        
     def _raw_get(self, uri, params = None):
         self._response = None
         if params:

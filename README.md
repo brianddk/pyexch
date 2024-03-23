@@ -1,8 +1,11 @@
 # pyexch
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repo-blue.svg)](https://github.com/brianddk/pyexch)
 [![PyPI version](https://badge.fury.io/py/pyexch.svg)](https://badge.fury.io/py/pyexch)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/license/apache-2-0/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repo-blue.svg)](https://github.com/brianddk/pyexch)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-blue.svg)](https://github.com/brianddk/pyexch/discussions)
+[![Donate with Bitcoin Lightning](https://img.shields.io/badge/Donate-Lightning-yellow.svg)](https://tippin.me/@dkbriand)
+[![Donate with Bitcoin](https://img.shields.io/badge/Donate-Bitcoin-orange.svg)](https://mempool.space/address/bc1qwc2203uym96u0nmq04pcgqfs9ldqz9l3mz8fpj)
 
 ***EARLY PREVIEW RELEASE*** of a rudimentary python CLI based rest client for Coinbase
 
@@ -28,11 +31,11 @@ is assumed if "--keystore" is not named
 
 ## Future Plans
 
+- [x] Add PUT and DELETE methods for Coinbase (untested)
+- [x] Mask input on private data so it's is muted on screen
 - [ ] Add [AES encryption][n], or port samples to [CryptoDomeX][o]
-- [ ] Add PUT and DELETE methods for Coinbase
 - [ ] Add Kraken as a supported Exchange
 - [ ] Add Binance as a supported Exchange (from USA ?!?)
-- [ ] Mask input on private data so it's is muted on screen
 
 ## Install and Initial Setup
 
@@ -120,10 +123,12 @@ If you choose OAuth2, you will need to create / authorize your app to get a gran
 pyexch --keystore gnupg_ks.json --auth coinbase.oauth2 --uri https://api.coinbase.com/oauth/authorize
 ```
 
-This will launch your web-browser and web-server to service the request and store the keys in your keystore.  You can display the keys on console using `print_keystore` call.  Note that since this get takes secret params, the `auth_url` is treated special and the parameters are built internally for processing to avoid the need for an encrypted `params.json` file.
+This will launch your web-browser and web-server to service the request and store the keys in your keystore.  Note that since this get takes secret params, the `auth_url` is treated special and the parameters are built internally for processing to avoid the need for an encrypted `params.json` file.
+
+You can display the keys that got updated on console using `print_keystore` call.  A redaction template can be included in `--params` to mask secrets from getting shown on screen.  In this workflow, simply seeing that the new oauth store got a auth token and a refresh token is a good indication that the calls worked.  If you want to see all the secrets, just omit the `--params` field in the call to `print_keystore`
 
 ```
-pyexch --keystore gnupg_ks.json --call print_keystore
+pyexch --keystore gnupg_ks.json --params redactions.json5 --call print_keystore
 ```
 
 Note that since OAuth tokens are short lived, you will need to refresh the tokens about every hour.  To refresh to token post to the `token_url` to get a new token.  Since this get takes secret params, the `token_url` is treated special and the parameters are built internally for processing to avoid the need for an encrypted `params.json` file.
@@ -164,7 +169,7 @@ These are the call endpoints that have internal functions without exchange inter
 - `my_ipv6` - Display your external IPv6 address for API binding
 - `new_uuid` - Display a new UUID used for some API calls
 - `update_keystore` - Used to modify an encrypted keystore (see above)
-- `print_keystore` - Print the decrypted keystore to the console
+- `print_keystore` - Print the decrypted keystore to the console (with redactions)
 - `sort_keystore` - Sort the keystore based on template provided in params
 - `sort_keyfile` - Sort the keyfile based on template provided in params
 
@@ -351,6 +356,3 @@ These endpoints are supported when using the `--auth` value of `coinbase.v3_api`
 [n]: https://stackoverflow.com/a/21928790/4634229
 [o]: https://stackoverflow.com/a/48175912/4634229
 [p]: https://github.com/coinbase/coinbase-python/?tab=readme-ov-file#market-data
-[q]: 
-[r]: 
-[s]: 

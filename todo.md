@@ -9,6 +9,8 @@
 - [x] Add [annotated GnuPG / Trezor / JSON files as docs][e]
 - [x] Add PyPi banners
 - [x] Add Keystore.sort() call to beutify JSON ordering
+- [x] Add PUT and DELETE methods for Coinbase (untested)
+- [x] Mask input on private data so it's is muted on screen
 - [ ] Add [AES encryption][h], or port samples to [CryptoDomeX][i]
 - [ ] Add python `unittest`
 - [ ] Add python static analysis tool

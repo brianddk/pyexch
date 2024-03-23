@@ -1,0 +1,53 @@
+// These are all the private key fields for internal keystores in pyexch v0.0.1 and earlier.
+//   In the normal course of operations, you may want to print the keystore without placing
+//   secrets into the console scroll buffers.  To replace the DISPLAY value of the secret
+//   fields with `null` you can feed this template in the `--params` field for a call to
+//   print_keystore.  If you want other fields redacted, just add to this template.
+
+{
+  // Possible formats are {json, trezor, gnupg}, but all internal stores are JSON
+  "format": "json",
+  
+  // Either {coinbase.oauth2, coinbase.v2_api, coinbase.v3_api}.  Used if --auth is not an arg
+  "default": "coinbase.oauth2",
+  
+  // Future values will be {coinbase, kraken, binance}, but presently only coinbase
+  "coinbase": {
+    
+    // Aquire from "My OAuth2 Applications" at https://www.coinbase.com/settings/api
+    "oauth2": {
+      
+      // The client ID you received after registering your application
+      "id": null,
+      
+      // The client secret you received after registering your application.
+      "secret": null,
+      
+      // The access_token returned by the registration / refresh process
+      "token": null,
+      
+      // The refresh_token required to perform a refresh of an expired access_token
+      "refresh": null,
+    },
+    
+    // Aquire from "API Keys" at https://www.coinbase.com/settings/api
+    "v2_api": {
+      
+      // Your API key used in CB-ACCESS-KEY header
+      "key": null,
+      
+      // Your Secret key used in the HMAC sign operation to create CB-ACCESS-SIGN header
+      "secret": null,
+    },
+    
+    // Aquire from "Trading key" at https://portal.cloud.coinbase.com/access/api
+    "v3_api": {
+      
+      // API Key used to build the JWT Token for the Authorization header
+      "key": null,
+      
+      // API Key used to build the JWT Token for the Authorization header
+      "secret": null,
+    },
+  }
+}

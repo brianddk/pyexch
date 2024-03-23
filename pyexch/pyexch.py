@@ -77,7 +77,7 @@ def main():
             ex.keystore.save()
             
         elif args.call == "print_keystore":
-            ex.keystore.print()
+            ex.keystore.print(args.params)
         elif args.call in ['sort_keystore', 'sort_keyfile']:
             method = getattr(ex.keystore, args.call)
             method(args.params)

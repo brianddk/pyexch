@@ -7,6 +7,7 @@ from zlib import compress, decompress, crc32
 from random import getrandbits
 from os import environ
 from sys import stderr
+from copy import deepcopy
 
 from trezorlib.client import TrezorClient
 from trezorlib.misc import decrypt_keyvalue, encrypt_keyvalue
@@ -28,7 +29,8 @@ class Keystore():
     def __init__(self, keystore_json = None):
         self._tzclient = None
         self.closed    = False
-        self._filename  = None
+        self._filename = None
+        self._keystore = None
         if(keystore_json):
             self.load(keystore_json)            
         
@@ -180,9 +182,22 @@ class Keystore():
         self._keystore = keystore
         self._dirty = False
     
-    def print(self, show_private = True):
-        # Todo enable show_private = False
-        print(dumps(self._keystore, indent=2))
+    def print(self, template = None):
+        if template:
+            template = Keystore(template)
+            bkup = Keystore()
+            bkup._keystore = deepcopy(self._keystore)            
+
+            # The sorter has a byproduct of dropping the fields not in the second arg
+            sorted = sort_dict(template._keystore, bkup._keystore)
+            
+            # Now that both dicts have the same keys, we can do a quite update to bkup
+            update(bkup._keystore, sorted, ask = False)
+            
+            # Print bkup which is just self minus the redacted fields
+            print(dumps(bkup._keystore, indent=2))            
+        else:
+            print(dumps(self._keystore, indent=2))
         
     def update(self, ks_cls):
         self._keystore = update(self._keystore, ks_cls._keystore)
@@ -250,18 +265,18 @@ def sort_dict(input_dict, template):
     else:
         return input_dict    
 
-def update(old_obj, new_obj, path=""):
-    for key, val in new_obj.items():
+def update(old_dict, new_dict, path="", ask = True):
+    for key, val in new_dict.items():
         if isinstance(val, Mapping):
-            old_obj[key] = update(old_obj.get(key, {}), val, f"{path}{key}.")
+            old_dict[key] = update(old_dict.get(key, {}), val, f"{path}{key}.", ask)
         else:
             prompt = path+key
-            if val == None:
+            if ask and val == None:
                 val = input(f"Enter {prompt}: ")
                 if prompt == "coinbase.v3_api.secret":
                     val = val.replace("\\n", "\n")
                 if key == "auth_ips":
                     val = [ip.strip() for ip in val.split(',')]                
-            old_obj[key] = val
+            old_dict[key] = val
 
-    return old_obj
+    return old_dict
