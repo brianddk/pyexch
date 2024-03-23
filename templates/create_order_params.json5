@@ -1,13 +1,32 @@
 // https://docs.cloud.coinbase.com/advanced-trade-api/reference/retailbrokerageapi_postorder
+//
+// pyexch --method post --url https://api.coinbase.com/api/v3/brokerage/orders
+//
+//   Either --auth coinbase.oauth2 or --auth coinbase.v3_api will work
 
 {
-  "client_order_id": "d6e41247-9b02-4192-9745-92f7fcc834b9", // pyexch --call new_uuid
+  // pyexch --call new_uuid
+  "client_order_id": "cdef0123-4567-89ab-cdef-0123456789ab",
+
+  // Order book to place the order on
   "product_id": "BTC-USD",
+  
+  // Generally either BUY or SELL
   "side": "BUY",
+  
+  // The order object
   "order_configuration": {
+    
+    // One of {market_market_ioc, limit_limit_gtc, limit_limit_gtd, stop_limit_stop_limit_gtc, stop_limit_stop_limit_gtd}
     "limit_limit_gtc": {
+      
+      // Books are named BASE-COUNTER, so this is the BTC amount your working with
       "base_size": "0.000030",
+      
+      // Counter currency (USD) price point to trigger on
       "limit_price": "45000",
+      
+      // Means to ensure this is 100% maker.  False to allow the order to split b/t maker/taker
       "post_only": true
     }
   }

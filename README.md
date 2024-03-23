@@ -1,5 +1,8 @@
 # pyexch
 
+[![PyPI version](https://badge.fury.io/py/pyexch.svg)](https://badge.fury.io/py/pyexch)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/license/apache-2-0/)
+
 ***EARLY PREVIEW RELEASE*** of a rudimentary python CLI based rest client for Coinbase
 
 ```
@@ -24,11 +27,7 @@ NOTE: Must name either "--call" or "--url", but not both
 
 ## Future Plans
 
-- [x] Add GET and POST methods for Coinbase
-- [x] Add OAuth2, API_v2 and API_v3 support for Coinbase
-- [x] Tag a (beta) release to reduce the nead to use the HEAD
-- [x] Release to PyPi for better CDN support
-- [x] Use [JSON5][g] for `load` and `loads` operations
+- [ ] Add [AES encryption][n], or port samples to [CryptoDomeX][o]
 - [ ] Add PUT and DELETE methods for Coinbase
 - [ ] Add Kraken as a supported Exchange
 - [ ] Add Binance as a supported Exchange (from USA ?!?)
@@ -38,14 +37,16 @@ NOTE: Must name either "--call" or "--url", but not both
 
 This utility allows you to use a Cryptocurrency Exchange's REST API to perform basic tasks and retrieve current and historical account data.  You will need to setup API / OAuth2 access keys in your account to use this utility.  The utility supports both GPG and Trezor-CipherKeyValue encryption.  You will need either a GPG key pair installed, or a Trezor attached.  As a fallback you can store API keys in naked JSON, but that is obviously not recommended.
 
-### Install with GIT / PIP
+### Install with Debug support
+
+If you want to debug one of the client calls or step into a [requests][j] call, you can install from GIT sources.  Then you can add breakpoints in source (`breakpoint()`) to get more detailed information.
 
 1. Get source: `git clone https://github.com/brianddk/pyexch.git`
 2. Switch directories: `cd pyexch`
-3. Install via pip: `pip install .`
+3. Install develop mode via pip: `pip install -e .`
 4. Verify install (cli-mode): `pyexch --help`
-
-Alternatively you can run it in module mode (`python -m pyexch --help`) or run the script directly (`python pyexch.py --help`).
+5. Optionally add `breakpoint()` into one of the `*.py` files
+6. Optionally step through code in the python debugger (`pdb`)
 
 ### Install without GIT
 
@@ -61,6 +62,8 @@ You won't get to documentation or templates, but all the code will land and func
 
 1. Install: `pip install pyexch`
 2. Verify install: `pyexch --help`
+
+Alternatively you can run it in module mode (`python -m pyexch --help`) or run the script directly (`python pyexch.py --help`).
 
 ## Building a Keystore
 
@@ -148,6 +151,189 @@ echo {"currency_pair" : "BTC-USD"} > params.json
 pyexch --call get_buy_price --params params.json --keystore gnupg_ks.json
 ```
 
+## Supported Call Commands
+
+These are the supported options for the `--call` parameter
+
+### Internal call endpoints
+
+These are the call endpoints that have internal functions without exchange interaction
+
+- `my_ipv4` - Display your external IPv4 address for API binding
+- `my_ipv6` - Display your external IPv6 address for API binding
+- `new_uuid` - Display a new UUID used for some API calls
+- `update_keystore` - Used to modify an encrypted keystore (see above)
+- `print_keystore` - Print the decrypted keystore to the console
+- `sort_keystore` - Sort the keystore based on template provided in params
+- `sort_keyfile` - Sort the keyfile based on template provided in params
+
+### coinbase.oauth2 call endpoints
+
+These endpoints are supported when using the `--auth` value of `coinbase.oauth2`.  These are exposed from the [coinbase.wallet.client.OAuthClient][h] client object.
+
+- `refresh` - Refresh the Oauth2 tokens since they are short lived
+- `revoke` - Revoke the existing Oauth2 token before expiration <!-- todo: test revocation more -->
+
+### coinbase.oauth2 / coinbase.v2_api call endpoints
+
+These endpoints are supported when using the `--auth` value of either `coinbase.oauth2` or `coinbase.v2_api`.  These are exposed from the [coinbase.wallet.client.OAuthClient][h] and [coinbase.wallet.client.Client][i] client objects.  All of these calls accept named parameters pulled from --params JSON.
+
+- `_get` - Private client method that passes directly through to [requests object][j].
+- `_post` - Private client method that passes directly through to [requests object][j]. 
+- `_put` - Private client method that passes directly through to [requests object][j].
+- `_delete` - Private client method that passes directly through to [requests object][j].
+- `buy` -See [client documentation][k] for details.
+- `cancel_request` -See [client documentation][k] for details.
+- `commit_buy` -See [client documentation][k] for details.
+- `commit_deposit` -See [client documentation][k] for details.
+- `commit_sell` -See [client documentation][k] for details.
+- `commit_withdrawal` -See [client documentation][k] for details.
+- `complete_request` -See [client documentation][k] for details. 
+- `create_account` -See [client documentation][k] for details.
+- `create_address` -See [client documentation][k] for details.
+- `create_checkout` -See [client documentation][k] for details.
+- `create_checkout_order` -See [client documentation][k] for details.
+- `create_order` -See [client documentation][k] for details.
+- `create_report` -See [client documentation][k] for details.
+- `delete_account` -See [client documentation][k] for details.
+- `deposit` -See [client documentation][k] for details.
+- `get_account` -See [client documentation][k] for details.
+- `get_accounts` -See [client documentation][k] for details.
+- `get_address` -See [client documentation][k] for details.
+- `get_address_transactions` -See [client documentation][k] for details. 
+- `get_addresses` -See [client documentation][k] for details.
+- `get_auth_info` -See [client documentation][k] for details.
+- `get_buy` -See [client documentation][k] for details.
+- `get_buy_price` -See [client documentation][k] for details.
+- `get_buys` -See [client documentation][k] for details.
+- `get_checkout` -See [client documentation][k] for details.
+- `get_checkout_orders` -See [client documentation][k] for details.
+- `get_checkouts` -See [client documentation][k] for details.
+- `get_currencies` -See [client documentation][k] for details.
+- `get_current_user` -See [client documentation][k] for details.
+- `get_deposit` -See [client documentation][k] for details.
+- `get_deposits` -See [client documentation][k] for details. 
+- `get_exchange_rates` -See [client documentation][k] for details.
+- `get_historic_prices` -See [client documentation][k] for details.
+- `get_merchant` -See [client documentation][k] for details.
+- `get_notification` -See [client documentation][k] for details.
+- `get_notifications` -See [client documentation][k] for details.
+- `get_order` -See [client documentation][k] for details.
+- `get_orders` -See [client documentation][k] for details.
+- `get_payment_method` -See [client documentation][k] for details.
+- `get_payment_methods` -See [client documentation][k] for details.
+- `get_primary_account` -See [client documentation][k] for details.
+- `get_report` -See [client documentation][k] for details.
+- `get_reports` -See [client documentation][k] for details. 
+- `get_sell` -See [client documentation][k] for details.
+- `get_sell_price` -See [client documentation][k] for details.
+- `get_sells` -See [client documentation][k] for details.
+- `get_spot_price` -See [client documentation][k] for details.
+- `get_time` -See [client documentation][k] for details.
+- `get_transaction` -See [client documentation][k] for details.
+- `get_transactions` -See [client documentation][k] for details.
+- `get_user` -See [client documentation][k] for details.
+- `get_withdrawal` -See [client documentation][k] for details.
+- `get_withdrawals` -See [client documentation][k] for details.
+- `refund_order` -See [client documentation][k] for details.
+- `request_money` -See [client documentation][k] for details.
+- `resend_request` -See [client documentation][k] for details.
+- `sell` -See [client documentation][k] for details.
+- `send_money` -See [client documentation][k] for details.
+- `session` -See [client documentation][k] for details.
+- `set_primary_account` -See [client documentation][k] for details.
+- `transfer_money` -See [client documentation][k] for details.
+- `update_account` -See [client documentation][k] for details.
+- `update_current_user` -See [client documentation][k] for details.
+- `verify_callback` -See [client documentation][k] for details. 
+- `withdraw` -See [client documentation][k] for details.
+
+### coinbase.v3_api call endpoints
+
+These endpoints are supported when using the `--auth` value of `coinbase.v3_api`.  These are exposed from the [coinbase.rest.RESTClient][l]  client object.  All of these calls accept named parameters pulled from --params JSON.
+
+- `get` - Public client method that passes directly through to [requests object][j].
+- `post` - Public client method that passes directly through to [requests object][j].
+- `put` - Public client method that passes directly through to [requests object][j].
+- `delete` - Public client method that passes directly through to [requests object][j].
+- `allocate_portfolio` -See [client documentation][m] for details.
+- `cancel_orders` -See [client documentation][m] for details.
+- `cancel_pending_futures_sweep` -See [client documentation][m] for details.
+- `commit_convert_trade` -See [client documentation][m] for details.
+- `create_convert_quote` -See [client documentation][m] for details.
+- `create_order` -See [client documentation][m] for details.
+- `create_portfolio` -See [client documentation][m] for details.
+- `delete_portfolio` -See [client documentation][m] for details.
+- `edit_order` -See [client documentation][m] for details.
+- `edit_portfolio` -See [client documentation][m] for details.
+- `get_account` -See [client documentation][m] for details.
+- `get_accounts` -See [client documentation][m] for details.
+- `get_best_bid_ask` -See [client documentation][m] for details.
+- `get_candles` -See [client documentation][m] for details.
+- `get_convert_trade` -See [client documentation][m] for details.
+- `get_fills` -See [client documentation][m] for details.
+- `get_futures_balance_summary` -See [client documentation][m] for details.
+- `get_futures_position` -See [client documentation][m] for details.
+- `get_market_trades` -See [client documentation][m] for details.
+- `get_order` -See [client documentation][m] for details.
+- `get_payment_method` -See [client documentation][m] for details.
+- `get_perps_portfolio_summary` -See [client documentation][m] for details.
+- `get_perps_position` -See [client documentation][m] for details.
+- `get_portfolio_breakdown` -See [client documentation][m] for details.
+- `get_portfolios` -See [client documentation][m] for details.
+- `get_product` -See [client documentation][m] for details.
+- `get_product_book` -See [client documentation][m] for details.
+- `get_products` -See [client documentation][m] for details.
+- `get_transaction_summary` -See [client documentation][m] for details.
+- `get_unix_time` -See [client documentation][m] for details.
+- `limit_order_gtc` -See [client documentation][m] for details.
+- `limit_order_gtc_buy` -See [client documentation][m] for details.
+- `limit_order_gtc_sell` -See [client documentation][m] for details.
+- `limit_order_gtd` -See [client documentation][m] for details.
+- `limit_order_gtd_buy` -See [client documentation][m] for details.
+- `limit_order_gtd_sell` -See [client documentation][m] for details.
+- `limit_order_ioc` -See [client documentation][m] for details.
+- `limit_order_ioc_buy` -See [client documentation][m] for details.
+- `limit_order_ioc_sell` -See [client documentation][m] for details.
+- `list_futures_positions` -See [client documentation][m] for details.
+- `list_futures_sweeps` -See [client documentation][m] for details.
+- `list_orders` -See [client documentation][m] for details.
+- `list_payment_methods` -See [client documentation][m] for details.
+- `list_perps_positions` -See [client documentation][m] for details.
+- `market_order` -See [client documentation][m] for details.
+- `market_order_buy` -See [client documentation][m] for details.
+- `market_order_sell` -See [client documentation][m] for details.
+- `move_portfolio_funds` -See [client documentation][m] for details.
+- `preview_edit_order` -See [client documentation][m] for details.
+- `preview_limit_order_gtc` -See [client documentation][m] for details.
+- `preview_limit_order_gtc_buy` -See [client documentation][m] for details.
+- `preview_limit_order_gtc_sell` -See [client documentation][m] for details.
+- `preview_limit_order_gtd` -See [client documentation][m] for details.
+- `preview_limit_order_gtd_buy` -See [client documentation][m] for details.
+- `preview_limit_order_gtd_sell` -See [client documentation][m] for details.
+- `preview_limit_order_ioc` -See [client documentation][m] for details.
+- `preview_limit_order_ioc_buy` -See [client documentation][m] for details.
+- `preview_limit_order_ioc_sell` -See [client documentation][m] for details.
+- `preview_market_order` -See [client documentation][m] for details.
+- `preview_market_order_buy` -See [client documentation][m] for details.
+- `preview_market_order_sell` -See [client documentation][m] for details.
+- `preview_order` -See [client documentation][m] for details.
+- `preview_stop_limit_order_gtc` -See [client documentation][m] for details.
+- `preview_stop_limit_order_gtc_buy` -See [client documentation][m] for details.
+- `preview_stop_limit_order_gtc_sell` -See [client documentation][m] for details.
+- `preview_stop_limit_order_gtd` -See [client documentation][m] for details.
+- `preview_stop_limit_order_gtd_buy` -See [client documentation][m] for details.
+- `preview_stop_limit_order_gtd_sell` -See [client documentation][m] for details.
+- `schedule_futures_sweep` -See [client documentation][m] for details.
+- `stop_limit_order_gtc` -See [client documentation][m] for details.
+- `stop_limit_order_gtc_buy` -See [client documentation][m] for details.
+- `stop_limit_order_gtc_sell` -See [client documentation][m] for details.
+- `stop_limit_order_gtd` -See [client documentation][m] for details.
+- `stop_limit_order_gtd_buy` -See [client documentation][m] for details.
+- `stop_limit_order_gtd_sell` -See [client documentation][m] for details.
+
+<!-- Link Nest -->
+
 [a]: https://docs.cloud.coinbase.com/sign-in-with-coinbase (api v2)
 [b]: https://docs.cloud.coinbase.com/advanced-trade-api (api v3)
 [c]: https://github.com/coinbase/coinbase-python/blob/master/README.rst#usage (client v2)
@@ -155,3 +341,15 @@ pyexch --call get_buy_price --params params.json --keystore gnupg_ks.json
 [e]: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/api-users#show-authorization-information
 [f]: https://github.com/coinbase/coinbase-python#usage
 [g]: https://github.com/Kijewski/pyjson5 (JSON5)
+[h]: https://github.com/coinbase/coinbase-python/?tab=readme-ov-file#oauth2
+[i]: https://github.com/coinbase/coinbase-python/?tab=readme-ov-file#api-key--secret
+[j]: https://docs.python-requests.org/en/latest/api/
+[k]: https://github.com/coinbase/coinbase-python/?tab=readme-ov-file#usage
+[l]: https://coinbase.github.io/coinbase-advanced-py/coinbase.rest.html#restclient-constructor
+[m]: https://coinbase.github.io/coinbase-advanced-py/index.html
+[n]: https://stackoverflow.com/a/21928790/4634229
+[o]: https://stackoverflow.com/a/48175912/4634229
+[p]: 
+[q]: 
+[r]: 
+[s]: 

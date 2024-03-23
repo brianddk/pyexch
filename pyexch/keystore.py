@@ -250,7 +250,7 @@ def sort_dict(input_dict, template):
     else:
         return input_dict    
 
-def update(self, old_obj, new_obj, path=""):
+def update(old_obj, new_obj, path=""):
     for key, val in new_obj.items():
         if isinstance(val, Mapping):
             old_obj[key] = update(old_obj.get(key, {}), val, f"{path}{key}.")

@@ -1,7 +1,14 @@
 // https://docs.cloud.coinbase.com/advanced-trade-api/reference/retailbrokerageapi_gethistoricalorders
+//  
+// pyexch --method post --url https://api.coinbase.com/api/v3/brokerage/orders/historical/batch
+//
+//   Either --auth coinbase.oauth2 or --auth coinbase.v3_api will work
 
 {
+  // Order type such as OPEN, CANCELLED, EXPIRED
   "order_status": "OPEN",
+  
+  // Order book to list orders from
   "product_id": "BTC-USD",
 }
 
