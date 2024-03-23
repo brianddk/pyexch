@@ -8,8 +8,8 @@
 
 ```
 usage: pyexch [-h] [--method <get,post,>] [--url https://...]
-              [--params params.json] [--call get_accounts] --keystore ks.json
-              [--auth exch.auth]
+              [--params params.json] [--call get_accounts]
+              [--keystore ks.json] [--auth exch.auth]
 
 Python Exchange CLI (pyexch)
 
@@ -17,13 +17,15 @@ optional arguments:
   -h, --help            show this help message and exit
   --method <get,post,>  rest http method (get<default>,post,put,delete)
   --url https://...     rest http url to perform actions upon
-  --params params.json  json / json5 filename holding rest parameters / data
+  --params params.json  json(5) filename holding rest parameters / data
   --call get_accounts   call method in the default client
-  --keystore ks.json    json / json5 filename where secrets are stored
-                        (backup!)
+  --keystore ks.json    json(5) filename where secrets are stored (backup!)
   --auth exch.auth      the auth method to use from keystore.
 
-NOTE: Must name either "--call" or "--url", but not both
+NOTE: Must name either "--call" or "--url", but not both, and "keystore.json"
+is assumed if "--keystore" is not named
+
+Keystore file "keystore.json" not found
 ```
 
 ## Future Plans
