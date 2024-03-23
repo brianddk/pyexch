@@ -82,7 +82,7 @@ class Exchange():
         if default and default.split('.')[0] == 'coinbase' or keystore.get('coinbase'):
             return Coinbase(keystore)
         else:
-            pass # todo Throw exception
+            return Exchange(keystore)
 
     def __init__(self, keystore):
         self.keystore = keystore

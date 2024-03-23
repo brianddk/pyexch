@@ -1,5 +1,6 @@
 # pyexch
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repo-blue.svg)](https://github.com/brianddk/pyexch)
 [![PyPI version](https://badge.fury.io/py/pyexch.svg)](https://badge.fury.io/py/pyexch)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/license/apache-2-0/)
 
@@ -39,7 +40,7 @@ This utility allows you to use a Cryptocurrency Exchange's REST API to perform b
 
 ### Install with Debug support
 
-If you want to debug one of the client calls or step into a [requests][j] call, you can install from GIT sources.  Then you can add breakpoints in source (`breakpoint()`) to get more detailed information.
+If you want to debug one of the client calls or step into a [requests][j] call, you can install from GIT sources.  Then you can add breakpoints in source using calls to `breakpoint()` to get more detailed information.
 
 1. Get source: `git clone https://github.com/brianddk/pyexch.git`
 2. Switch directories: `cd pyexch`
@@ -97,7 +98,7 @@ Template:
     "oauth2": {
       "auth_url": "https://api.coinbase.com/oauth/authorize",
       "token_url": "https://api.coinbase.com/oauth/token",
-      "revoke_url": "https://api.coinbase.com/oauth/token",
+      "revoke_url": "https://api.coinbase.com/oauth/revoke",
       "redirect_url": "http://localhost:8000/callback",
       "scope": "wallet:user:read,wallet:accounts:read",
       "id": null,
@@ -110,25 +111,25 @@ Template:
 With both the GnuPG and OAuth2 templates, the `update_keystore` call will prompt for the `null` fields, and encrypt the resultant merge with GnuPG
 
 ```
-pyexch --call update_keystore --params coinbase_oauth2.json --keystore gnupg_ks.json --auth coinbase.oauth2
+pyexch --keystore gnupg_ks.json --params coinbase_oauth2.json --call update_keystore
 ```
 
 If you choose OAuth2, you will need to create / authorize your app to get a grant token
 
 ```
-pyexch --uri https://www.coinbase.com/oauth/authorize --keystore gnupg_ks.json --auth coinbase.oauth2
+pyexch --keystore gnupg_ks.json --auth coinbase.oauth2 --uri https://api.coinbase.com/oauth/authorize
 ```
 
 This will launch your web-browser and web-server to service the request and store the keys in your keystore.  You can display the keys on console using `print_keystore` call.  Note that since this get takes secret params, the `auth_url` is treated special and the parameters are built internally for processing to avoid the need for an encrypted `params.json` file.
 
 ```
-pyexch --call print_keystore --keystore gnupg_ks.json
+pyexch --keystore gnupg_ks.json --call print_keystore
 ```
 
-Note that since OAuth tokens are short lived, you will need to refresh the tokens about every hour.  To refresh to token post to the `token_url` to get a new token.  Note that since this get takes secret params, the `token_url` is treated special and the parameters are built internally for processing to avoid the need for an encrypted `params.json` file.
+Note that since OAuth tokens are short lived, you will need to refresh the tokens about every hour.  To refresh to token post to the `token_url` to get a new token.  Since this get takes secret params, the `token_url` is treated special and the parameters are built internally for processing to avoid the need for an encrypted `params.json` file.
 
 ```
-pyexch --method post --uri https://api.coinbase.com/oauth/token --keystore gnupg_ks.json
+pyexch --keystore gnupg_ks.json --method post --uri https://api.coinbase.com/oauth/token
 ```
 Note: The `--auth` choice is cached in the keystore so the last choice used is assumed unless `--auth` is named again.
 
@@ -141,17 +142,17 @@ To learn which calls are supported, look at the [V2 Client][c] and [V3 Client][d
 For example, to exercise the V2-API [Show Authorization Information endpoint][e], you can do the following
 
 ```
-pyexch --url https://api.coinbase.com/v2/user/auth --keystore gnupg_ks.json
+pyexch --keystore gnupg_ks.json --url https://api.coinbase.com/v2/user/auth
 ```
 
-To call the [get_buy_price][] method from the V2-Client using BTC-USD trading pair (use `\"` with echo on certain shells)
+To call the [get_buy_price][p] method from the V2-Client using BTC-USD trading pair (use `\"` with echo on certain shells)
 
 ```
 echo {"currency_pair" : "BTC-USD"} > params.json
-pyexch --call get_buy_price --params params.json --keystore gnupg_ks.json
+pyexch --keystore gnupg_ks.json --params params.json --call get_buy_price
 ```
 
-## Supported Call Commands
+## Supported Call Endpoints
 
 These are the supported options for the `--call` parameter
 
@@ -349,7 +350,7 @@ These endpoints are supported when using the `--auth` value of `coinbase.v3_api`
 [m]: https://coinbase.github.io/coinbase-advanced-py/index.html
 [n]: https://stackoverflow.com/a/21928790/4634229
 [o]: https://stackoverflow.com/a/48175912/4634229
-[p]: 
+[p]: https://github.com/coinbase/coinbase-python/?tab=readme-ov-file#market-data
 [q]: 
 [r]: 
 [s]: 
