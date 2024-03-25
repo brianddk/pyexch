@@ -13,7 +13,7 @@ TAKER  = 0.01       # do buys 1% above market (taker action)
 SPREAD = 0.06       # do buys 1% above to 5% below (peanut butter spread)
 MKRFEE = 0.0040     # fee for maker limit orders
 TKRFEE = 0.0060     # fee for taker limit orders
-DCAUSD = 10.14      # USD to deposit on our DCAs
+DCAUSD = 10.00      # USD to deposit on our DCAs
 DEPOSIT = True
 CANCEL_OPEN = True
 DEPSOIT_DELAY = 12 * HOUR  # If we've deposited in the last 12hrs, skip
@@ -61,7 +61,7 @@ if DEPOSIT:
     resp = cboa.oa2_client.get_deposits(account_id)
     for deposit in resp['data']:
         created = datetime.strptime(deposit['created_at'], ISOFMT).astimezone(timezone.utc)
-        if (current - created).total_seconds() < :
+        if (current - created).total_seconds() < DEPSOIT_DELAY:
             need_deposit = False
             break
 
@@ -79,9 +79,10 @@ if DEPOSIT:
             
         assert account_id and pmt_method_id
 
+        dcausd = DCAUSD + current.day/100 # set pennies to day of month
         # Make the deposit
         #
-        resp = cboa.oa2_client.deposit(account_id, amount=f"{DCAUSD:.2f}", currency="USD", payment_method=pmt_method_id)
+        resp = cboa.oa2_client.deposit(account_id, amount=f"{dcausd:.2f}", currency="USD", payment_method=pmt_method_id)
 
 sleep(3) # There really is a settle time from cancel to avail balance... insane.
 
