@@ -1,0 +1,10 @@
+{
+  "id": "456789ab-cdef-0123-4567-89abcdef0123",
+  "name": "USD Wallet",
+  "type": "COINBASE_FIAT_ACCOUNT"
+}
+{
+  "id": "3456789a-bcde-f012-3456-789abcdef012",
+  "name": "Bubba Gump Bank of LA",
+  "type": "ACH"
+}

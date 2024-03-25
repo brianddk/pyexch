@@ -91,7 +91,10 @@ def main():
             elif auth == 'coinbase.v2_api': client = ex.v2_client
             elif auth == 'coinbase.v3_api': client = ex.v3_client
             method = getattr(client, args.call)
-            resp = method(**params)
+            if params:
+                resp = method(**params)
+            else:
+                resp = method()
         
     if args.url:
         method = getattr(ex, args.method)
