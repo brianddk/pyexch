@@ -121,7 +121,7 @@ def main():
                 payment_method=pmt_method_id,
             )
             print(
-                f"Created deposit of {float(resp['data']['amount']['amount'])} @ {resp['data']['created_at']}"
+                f"Created deposit of {float(resp['amount']['amount'])} @ {resp['data']['created_at']}"
             )
             # print(f"DBG: deposit['amt:{dcausd}']:", dumps(data_toDict(resp)))
 

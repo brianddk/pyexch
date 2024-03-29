@@ -2,11 +2,12 @@
 #
 # pip install pyexch
 #
-from datetime import datetime, timezone
-# from json import dump, dumps
-from time import time
 
+# from json import dump, dumps
 # from pyjson5 import load, loads
+
+from datetime import datetime, timezone
+from time import time
 
 from pyexch.exchange import Exchange  # , data_toDict
 
@@ -74,15 +75,17 @@ def main():
             * (1 + TAKER)
         )
         print(
-            f"{key}: Bought {btc:.8f} BTC at {ord_price:.2f} with daily average of {avg_price:.2f}"
+            f"{key}: Bought {btc:.8f} BTC at {ord_price:.2f} instead of {avg_price:.2f}"
         )
 
         ord_usd += usd
         ord_btc += btc
         avg_usd += avg_price * btc
 
+    saved_usd = avg_usd - ord_usd
+    saved_pct = saved_usd / avg_usd * 100
     print(
-        f"Total: Bought {ord_btc:.8f} BTC for {ord_usd/ord_btc:.2f} instead of {avg_usd/ord_btc:.2f}"
+        f"Total: Bought {ord_btc:.8f} BTC for {ord_usd/ord_btc:.2f} instead of {avg_usd/ord_btc:.2f}, saving ${saved_usd:.2f} ({saved_pct:.2f}%)"
     )
 
 
