@@ -11,8 +11,8 @@ from pyexch.exchange import Exchange  # , data_toDict
 
 HOUR = 60 * 60  # one-hr in seconds
 
-TAKER = 0.01  # do buys 1% above market (taker action)
-SPREAD = 0.06  # do buys 1% above to 5% below (peanut butter spread)
+TAKER = 0 - 0.000001  # do buys 1% above market (taker action)
+SPREAD = 0.05  # do buys 1% above to 5% below (peanut butter spread)
 MKRFEE = 0.0060  # fee for maker limit orders
 TKRFEE = 0.0080  # fee for taker limit orders
 DCAUSD = 10.00  # USD to deposit on our DCAs
@@ -20,6 +20,8 @@ DEPOSIT = True
 CANCEL_OPEN = True
 DEPSOIT_DELAY = 12 * HOUR  # If we've deposited in the last 12hrs, skip
 
+MAXCNT = 500  # 500 The maximum number of orders allowed
+MAXCAN = 100  # 100 The maximum number of orders to cancel
 MIXFEE = TAKER / SPREAD * TKRFEE + (1 - TAKER / SPREAD) * MKRFEE
 PMTTYP = "ACH"
 PRODID = "BTC-USD"
@@ -53,7 +55,9 @@ def main():
         # Cancel the outstanding orders
         #
         if params:
-            resp = cbv3.v3_client.cancel_orders(order_ids=params)
+            sublist = [params[i : i + MAXCAN] for i in range(0, len(params), MAXCAN)]
+            for params in sublist:
+                resp = cbv3.v3_client.cancel_orders(order_ids=params)
 
     # Get my account_id of WALTID (USD Wallet)
     #
@@ -121,7 +125,7 @@ def main():
                 payment_method=pmt_method_id,
             )
             print(
-                f"Created deposit of {float(resp['amount']['amount'])} @ {resp['data']['created_at']}"
+                f"Created deposit of {float(resp['amount']['amount']):.2f} @ {resp['created_at']}"
             )
             # print(f"DBG: deposit['amt:{dcausd}']:", dumps(data_toDict(resp)))
 
@@ -153,7 +157,7 @@ def main():
     price_hi = spot * (1 + TAKER)
     price_lo = price_hi * (1 - SPREAD)
     price_av = (price_hi + price_lo) / 2
-    count = min(int(balance / (min_size * price_av * (1 + MKRFEE))), 500)
+    count = min(int(balance / (min_size * price_av * (1 + MKRFEE))), MAXCNT)
     step = (price_hi - price_lo) / (count - 1)  # remember bookend math
     price = price_hi
     # print(spot, count, balance)
@@ -168,14 +172,7 @@ def main():
             limit_price=f"{price:.2f}",
             post_only=True,
         )
-        resp = cbv3.v3_client.limit_order_gtc_buy(**params)
-        if (
-            not resp["success"]
-            and resp["error_response"]["error"] == "INVALID_LIMIT_PRICE_POST_ONLY"
-        ):
-            params.update(dict(post_only=False, base_size=f"{min_size:.8f}"))
-            resp = cbv3.v3_client.limit_order_gtc_buy(**params)
-        resp = cbv3.v3_client.get_order(resp["order_id"])
+        resp = mk_order(cbv3, params, min_size)
         if resp["order"]["status"] == "FILLED":
             cost = float(resp["order"]["total_value_after_fees"])
             xprice = float(resp["order"]["average_filled_price"])
@@ -187,6 +184,34 @@ def main():
         assert price and step and cost and balance
 
     return cboa
+
+
+def mk_order(cbv3, params, min_size):
+    retry = 3
+    for i in range(retry):
+        resp = cbv3.v3_client.limit_order_gtc_buy(**params)
+        if resp["success"]:
+            break
+        if resp["error_response"]["error"] == "INVALID_LIMIT_PRICE_POST_ONLY":
+            params.update(dict(post_only=False, base_size=f"{min_size:.8f}"))
+            for j in range(retry):
+                resp = cbv3.v3_client.limit_order_gtc_buy(**params)
+                if resp["success"]:
+                    break
+
+    # breakpoint()
+    if resp["success"]:
+        for i in range(retry):
+            try:
+                resp = cbv3.v3_client.get_order(resp["order_id"])
+            except Exception:
+                print("retrying")
+                sleep(1)
+                continue
+            if resp["order"]:
+                break
+
+    return resp
 
 
 def mk_size(price, count, step, balance, spot, min_size):

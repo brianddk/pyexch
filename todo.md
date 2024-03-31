@@ -11,11 +11,14 @@
 - [x] Add Keystore.sort() call to beutify JSON ordering
 - [x] Add PUT and DELETE methods for Coinbase (untested)
 - [x] Mask input on private data so it's is muted on screen
+- [x] Add python static analysis tool (flake8)
+- [x] Paginate fills on get_fills in DCA results
+- [ ] BugRpt that max_size has dropped to 0.00000001
+- [ ] BugRpt that retries are req to pull committed orders (see try in DCA)
 - [ ] Convert from setup.py to pyproject.toml
 - [ ] Add [AES encryption][h], or port samples to [CryptoDomeX][i]
 - [ ] Cleaner update of UID across all my GPG keys
 - [ ] Add python `unittest`
-- [ ] Add python static analysis tool
 - [ ] Add Travis with banners
 - [ ] Add [read-the-docs via sphinx][k]
 - [ ] Fix ArgParse "NOTE" and `mutually_exlusive_group`

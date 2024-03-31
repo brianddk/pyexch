@@ -125,7 +125,7 @@ def main():
     if resp:
         print(dumps(resp, indent=2))
     elif ex._response is not None:
-        print("Last Response:", ex._response, file=stderr)
+        print("[ERROR] Last Response:", ex._response, file=stderr)
 
 
 if __name__ == "__main__":

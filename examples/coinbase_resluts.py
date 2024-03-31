@@ -13,6 +13,7 @@ from pyexch.exchange import Exchange  # , data_toDict
 
 MAKER = 0.006
 TAKER = 0.008
+COUNT = 10_000
 
 
 def main():
@@ -24,7 +25,15 @@ def main():
     now = int(time())
     earlier = now - (100 * 24 * 60 * 60)
 
-    fills = cbv3.v3_client.get_fills(product_id="BTC-USD")
+    cursor = ""
+    fills = dict(fills=list())
+    while len(fills["fills"]) < COUNT:
+        resp = cbv3.v3_client.get_fills(product_id="BTC-USD", cursor=cursor)
+        cursor = resp["cursor"]
+        fills["fills"] += resp["fills"]
+        if not cursor:
+            break
+
     candles = cbv3.v3_client.get_candles(
         product_id="BTC-USD",
         granularity="ONE_DAY",
@@ -63,11 +72,13 @@ def main():
     for key, value in date_fill.items():
         usd = btc = 0
         for order in value["fills"]:
-            fee = TAKER
-            if order["liquidity_indicator"] == "MAKER":
-                fee = MAKER
+            # fee = TAKER
+            # if order["liquidity_indicator"] == "MAKER":
+            # fee = MAKER
             btc += float(order["size"])
-            usd += float(order["price"]) * float(order["size"]) * (1 + fee)
+            usd += float(order["price"]) * float(order["size"]) + float(
+                order["commission"]
+            )
         ord_price = usd / btc
         avg_price = (
             (float(value["candle"]["open"]) + float(value["candle"]["close"]))

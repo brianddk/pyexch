@@ -185,21 +185,22 @@ class Coinbase(Exchange):
 
     def get(self, uri, params=None):
         self._response = None
-        pth = uri.replace("https://api.coinbase.com", "")
+        trim_str = "https://api.coinbase.com"
+        uri = uri.replace(trim_str, "")
         if params:
             self._params = data_toDict(params)
         if self.keystore.get("default") == "coinbase.oauth2":
-            if uri == self.keystore.get("coinbase.oauth2.auth_url"):
+            if trim_cmp(trim_str, uri, self.keystore.get("coinbase.oauth2.auth_url")):
                 self._response = self.oa2_auth()
                 self._response = (
                     dict(msg="REDACTED") if self._response else self._response
                 )
             else:
-                self._response = self.oa2_client._get(pth, params=params)
+                self._response = self.oa2_client._get(uri, params=params)
         elif self.keystore.get("default") == "coinbase.v2_api":
-            self._response = self.v2_client._get(pth, params=params)
+            self._response = self.v2_client._get(uri, params=params)
         elif self.keystore.get("default") == "coinbase.v3_api":
-            self._response = self.v3_client.get(pth, params=params)
+            self._response = self.v3_client.get(uri, params=params)
         else:
             print("todo unknown get")  # todo unknown get
 
@@ -208,23 +209,26 @@ class Coinbase(Exchange):
     def post(self, uri, params=None):
         data = params
         self._response = None
-        pth = uri.replace("https://api.coinbase.com", "")
+        trim_str = "https://api.coinbase.com"
+        uri = uri.replace(trim_str, "")
         if data:
             self._params = data_toDict(data)
         if self.keystore.get("default") == "coinbase.oauth2":
-            if uri == self.keystore.get("coinbase.oauth2.token_url"):
+            if trim_cmp(trim_str, uri, self.keystore.get("coinbase.oauth2.token_url")):
                 self._response = self.oa2_refresh(force=True)
                 self._response = (
                     dict(msg="REDACTED") if self._response else self._response
                 )
-            elif uri == self.keystore.get("coinbase.oauth2.revoke_url"):
+            elif trim_cmp(
+                trim_str, uri, self.keystore.get("coinbase.oauth2.revoke_url")
+            ):
                 self._response = self.oa2_revoke()
             else:
-                self._response = self.oa2_client._post(pth, data=data)
+                self._response = self.oa2_client._post(uri, data=data)
         elif self.keystore.get("default") == "coinbase.v2_api":
-            self._response = self.v2_client._post(pth, data=data)
+            self._response = self.v2_client._post(uri, data=data)
         elif self.keystore.get("default") == "coinbase.v3_api":
-            self._response = self.v3_client.post(pth, data=data)
+            self._response = self.v3_client.post(uri, data=data)
         else:
             print("todo unknown post")  # todo unknown get
 
@@ -233,15 +237,16 @@ class Coinbase(Exchange):
     def put(self, uri, params=None):
         data = params
         self._response = None
-        pth = uri.replace("https://api.coinbase.com", "")
+        trim_str = "https://api.coinbase.com"
+        uri = uri.replace(trim_str, "")
         if data:
             self._params = data_toDict(data)
         if self.keystore.get("default") == "coinbase.oauth2":
-            self._response = self.oa2_client._put(pth, data=data)
+            self._response = self.oa2_client._put(uri, data=data)
         elif self.keystore.get("default") == "coinbase.v2_api":
-            self._response = self.v2_client._put(pth, data=data)
+            self._response = self.v2_client._put(uri, data=data)
         elif self.keystore.get("default") == "coinbase.v3_api":
-            self._response = self.v3_client.put(pth, data=data)
+            self._response = self.v3_client.put(uri, data=data)
         else:
             print("todo unknown post")  # todo unknown get
 
@@ -249,7 +254,8 @@ class Coinbase(Exchange):
 
     def delete(self, uri, params=None):
         self._response = None
-        pth = uri.replace("https://api.coinbase.com", "")
+        trim_str = "https://api.coinbase.com"
+        uri = uri.replace(trim_str, "")
 
         # No CB endpoint is using params or data on delete
         #  If added back, remember to put it in the calls below.
@@ -258,11 +264,11 @@ class Coinbase(Exchange):
         #   self._params = data_toDict(data)
 
         if self.keystore.get("default") == "coinbase.oauth2":
-            self._response = self.oa2_client._delete(pth)
+            self._response = self.oa2_client._delete(uri)
         elif self.keystore.get("default") == "coinbase.v2_api":
-            self._response = self.v2_client._delete(pth)
+            self._response = self.v2_client._delete(uri)
         elif self.keystore.get("default") == "coinbase.v3_api":
-            self._response = self.v3_client.delete(pth)
+            self._response = self.v3_client.delete(uri)
         else:
             print("todo unknown post")  # todo unknown get
 
@@ -414,3 +420,9 @@ def data_toDict(data):
             return loads(data)
         except Exception:  # as e:
             return dict()
+
+
+def trim_cmp(trim_str, str_a, str_b):
+    str_a = str_a.replace(trim_str, "")
+    str_b = str_b.replace(trim_str, "")
+    return str_a == str_b
