@@ -419,14 +419,14 @@ def run_server(port, handler):
 
 
 def data_toDict(data):
+    # bugbug: This should never happen, but the cloudflare (or whoever) server sometimes returns
+    # Requests.Response.content as <type 'str'> and other times as <type 'bytes'>.  This breaks
+    # Requests.Response.json() since it expects 'bytes'
+    # https://github.com/psf/requests/blob/d63e94f/src/requests/models.py#L942
     if type(data) is dict:
         return data
     if type(data) is Response:
         if type(data.content) is str:
-            # bugbug: This should never happen, but the cloudflare (or whoever) server sometimes returns
-            # Requests.Response.content as <type 'str'> and other times as <type 'bytes'>.  This breaks
-            # Requests.Response.json() since it expects 'bytes'
-            # https://github.com/psf/requests/blob/d63e94f/src/requests/models.py#L942
             data = data.content
         else:
             try:
