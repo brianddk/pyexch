@@ -135,6 +135,20 @@ class Exchange:
     def new_uuid(self):
         return uuid4()
 
+    def dbg(self):
+        token = self.keystore.get("coinbase.oauth2.token")
+        return f"DBG: {token[:4]}...{token[-4:]}"
+
+    def tick(self):
+        import time
+
+        expiration = self.keystore.get("coinbase.oauth2.expiration")
+        left = expiration - time.time()
+        hrs = left // (60 * 60)
+        min = (left - hrs * 60 * 60) // 60
+        sec = left - hrs * 60 * 60 - min * 60
+        return f"DBG: countdown {int(hrs):02}:{int(min):02}:{sec:0>02.2f}"
+
 
 class Coinbase(Exchange):
     def __init__(self, keystore):
@@ -303,6 +317,8 @@ class Coinbase(Exchange):
         )
         # rule  https://forums.coinbasecloud.dev/t/walletsend-is-limited-1-00-day-per-user/866/2
         # broke https://forums.coinbasecloud.dev/t/oauth-application-maximum-of-1-00-per-month/7096/13
+        # Confirmed this meta tags allow to set the send limit.  Next is to try a send with CB-2FA-TOKEN
+        # header: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/sign-in-with-coinbase-2fa
         if "wallet:transactions:send" in self.keystore.get("coinbase.oauth2.scope"):
             self._params.update(
                 {
@@ -387,6 +403,8 @@ class Coinbase(Exchange):
         uri = self.keystore.get("coinbase.oauth2.revoke_url")
         self._params = dict(
             token=self.keystore.get("coinbase.oauth2.token"),
+            client_id=self.keystore.get("coinbase.oauth2.id"),
+            client_secret=self.keystore.get("coinbase.oauth2.secret"),
         )
         self._response = requests.post(uri, data=self._params)
 

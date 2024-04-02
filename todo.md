@@ -15,6 +15,7 @@
 - [x] Paginate fills on get_fills in DCA results
 - [ ] BugRpt that max_size has dropped to 0.00000001
 - [ ] BugRpt that retries are req to pull committed orders (see try in DCA)
+- [ ] Test Send Transaction with [CB-2FA-TOKEN][m] console prompting
 - [ ] Convert from setup.py to pyproject.toml
 - [ ] Add [AES encryption][h], or port samples to [CryptoDomeX][i]
 - [ ] Cleaner update of UID across all my GPG keys
@@ -67,7 +68,7 @@
 [j]: #publish-to-github
 [k]: https://docs.readthedocs.io/en/stable/tutorial/index.html (RTD Tutorial)
 [l]: #publish-to-pypi
-[m]: 
+[m]: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/sign-in-with-coinbase-2fa
 [n]: 
 [o]: 
 [p]: 

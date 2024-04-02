@@ -11,13 +11,14 @@ from pyexch.exchange import Exchange  # , data_toDict
 
 HOUR = 60 * 60  # one-hr in seconds
 
-TAKER = 0 - 0.000001  # do buys 1% above market (taker action)
+DEPOSIT = True
+CANCEL_OPEN = True
+TAKER = 0.01  # do some taker action
 SPREAD = 0.05  # do buys 1% above to 5% below (peanut butter spread)
+THRESHOLD = 0.95  # Percent of holds to clear before starting
 MKRFEE = 0.0060  # fee for maker limit orders
 TKRFEE = 0.0080  # fee for taker limit orders
 DCAUSD = 10.00  # USD to deposit on our DCAs
-DEPOSIT = True
-CANCEL_OPEN = True
 DEPSOIT_DELAY = 12 * HOUR  # If we've deposited in the last 12hrs, skip
 
 MAXCNT = 500  # 500 The maximum number of orders allowed
@@ -31,6 +32,7 @@ ISOFMT = "%Y-%m-%dT%H:%M:%S%z"  # Time parse formatter
 
 def main():
     current = datetime.now().astimezone(timezone.utc)
+    dcausd = DCAUSD + current.day / 100  # set pennies to day of month
 
     cbv3 = Exchange.create("keystore.json", "coinbase.v3_api")
     cbv3.keystore.close()  # Trezor devices should only have one handle at a time
@@ -38,26 +40,6 @@ def main():
 
     account_id = cboa.keystore.get("coinbase.state.usd_wallet")
     pmt_method_id = cboa.keystore.get("coinbase.state.ach_payment")
-
-    if CANCEL_OPEN:
-        # Get outstanding orders to cancel
-        #
-        resp = cbv3.v3_client.list_orders(order_status=["OPEN"])
-        params = []
-        for order in resp["orders"]:
-            if (
-                order["status"] == "OPEN"
-                and order["product_id"] == PRODID
-                and order["side"] == "BUY"
-            ):
-                params += [order["order_id"]]
-
-        # Cancel the outstanding orders
-        #
-        if params:
-            sublist = [params[i : i + MAXCAN] for i in range(0, len(params), MAXCAN)]
-            for params in sublist:
-                resp = cbv3.v3_client.cancel_orders(order_ids=params)
 
     # Get my account_id of WALTID (USD Wallet)
     #
@@ -74,6 +56,12 @@ def main():
         cboa.keystore.set("coinbase.state.usd_wallet", account_id)
         cboa.keystore.save()
         # print(f"DBG: account['name:{WALTID}']:", account_id)
+
+    # Determine 90% funding for waitclock
+    #
+    balance = get_balance(cbv3, account_id)
+    hold = float(cbv3._response["account"]["hold"]["value"])
+    target = THRESHOLD * (hold + dcausd) + balance
 
     if DEPOSIT:
         # Check to see if we've deposited today
@@ -115,7 +103,6 @@ def main():
                 cboa.keystore.save()
                 # print(f"DBG: payment_method['type:{PMTTYP}']:", pmt_method_id)
 
-            dcausd = DCAUSD + current.day / 100  # set pennies to day of month
             # Make the deposit
             #
             resp = cboa.oa2_client.deposit(
@@ -129,18 +116,25 @@ def main():
             )
             # print(f"DBG: deposit['amt:{dcausd}']:", dumps(data_toDict(resp)))
 
-    sleep(3)  # There really is a settle time from cancel to avail balance... insane.
+    if CANCEL_OPEN:
+        # Get outstanding orders to cancel
+        #
+        resp = cbv3.v3_client.list_orders(order_status=["OPEN"])
+        params = []
+        for order in resp["orders"]:
+            if (
+                order["status"] == "OPEN"
+                and order["product_id"] == PRODID
+                and order["side"] == "BUY"
+            ):
+                params += [order["order_id"]]
 
-    # Get my available balance of WALTID (USD Wallet)
-    #
-    resp = cbv3.v3_client.get_account(account_id)
-    if (
-        resp["account"]["available_balance"]["currency"] == "USD"
-        and resp["account"]["name"] == WALTID
-    ):
-        balance = float(resp["account"]["available_balance"]["value"])
-
-    assert account_id and balance
+        # Cancel the outstanding orders
+        #
+        if params:
+            sublist = [params[i : i + MAXCAN] for i in range(0, len(params), MAXCAN)]
+            for params in sublist:
+                resp = cbv3.v3_client.cancel_orders(order_ids=params)
 
     # Get today's min_size and price for PRODID (BTC-USD)
     #
@@ -149,11 +143,21 @@ def main():
         min_size = float(product["base_min_size"])
         spot = float(product["price"])
 
-    assert account_id and balance and min_size and spot
+    assert account_id and min_size and spot
+
+    # Get my available balance of WALTID (USD Wallet)
+    #
+    adjust = 0.0 if DEPOSIT and need_deposit else THRESHOLD * dcausd
+    target -= adjust
+    while abs(balance - target) > 1 and balance < target:
+        sleep(1)
+        print(f"Waiting: balance={balance:.2f}, target={target:.2f}")
+        balance = get_balance(cbv3, account_id)
 
     # "Peanut Butter Spread" the buys as small as possible from spot down to SPREAD (5%) below.
     #
 
+    # price_hi = 66_857.20
     price_hi = spot * (1 + TAKER)
     price_lo = price_hi * (1 - SPREAD)
     price_av = (price_hi + price_lo) / 2
@@ -176,14 +180,28 @@ def main():
         if resp["order"]["status"] == "FILLED":
             cost = float(resp["order"]["total_value_after_fees"])
             xprice = float(resp["order"]["average_filled_price"])
-        balance -= cost
+        # balance -= cost
+        cbal = balance - cost
+        balance = get_balance(cbv3, account_id)
         print(
-            f"{count} Limit buy of {params['base_size']} btc at {xprice:.2f}, at a cost of {cost:.2f}, leaving balance of {balance:.2f}"
+            f"{count} Limit buy of {params['base_size']} btc at {xprice:.2f}, at a cost of {cost:.2f}, leaving balance of {balance:.2f} ({cbal:.2f})"
         )
         price -= step
         assert price and step and cost and balance
 
     return cboa
+
+
+def get_balance(cbv3, account_id):
+    resp = cbv3._response = cbv3.v3_client.get_account(account_id)
+    if (
+        resp["account"]["available_balance"]["currency"] == "USD"
+        and resp["account"]["name"] == WALTID
+    ):
+        balance = float(resp["account"]["available_balance"]["value"])
+
+    assert account_id and balance
+    return balance
 
 
 def mk_order(cbv3, params, min_size):
@@ -193,7 +211,8 @@ def mk_order(cbv3, params, min_size):
         if resp["success"]:
             break
         if resp["error_response"]["error"] == "INVALID_LIMIT_PRICE_POST_ONLY":
-            params.update(dict(post_only=False, base_size=f"{min_size:.8f}"))
+            # params.update(dict(post_only=False, base_size=f"{min_size:.8f}"))
+            params.update(dict(post_only=False))
             for j in range(retry):
                 resp = cbv3.v3_client.limit_order_gtc_buy(**params)
                 if resp["success"]:
@@ -228,8 +247,9 @@ def mk_size(price, count, step, balance, spot, min_size):
 
 
 if __name__ == "__main__":
-    # try:
-    cboa = main()
-    # except Exception as e:
-    # ex = e
-    # print(ex)
+    # main()
+    try:
+        cboa = main()
+    except Exception as e:
+        ex = e
+        breakpoint()

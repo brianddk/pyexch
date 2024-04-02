@@ -40,6 +40,7 @@ def main():
         start=str(earlier),
         end=str(now),
     )
+    spot = float(candles["candles"][0]["close"]) * (1 + TAKER)
 
     date_candle = dict()
     for candle in candles["candles"]:
@@ -53,9 +54,14 @@ def main():
     for order in fills["fills"]:
         if order["side"] != "BUY" or order["trade_type"] != "FILL":
             break
-        dt = datetime.strptime(order["trade_time"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(
-            tzinfo=timezone.utc
-        )
+        try:
+            dt = datetime.strptime(
+                order["trade_time"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).replace(tzinfo=timezone.utc)
+        except ValueError:
+            dt = datetime.strptime(order["trade_time"], "%Y-%m-%dT%H:%M:%SZ").replace(
+                tzinfo=timezone.utc
+            )
         key = dt.strftime("%Y-%m-%d")
         # date_fill[DATE][FILLS] = list()
         # date_fill[DATE][CANDEL] = candle
@@ -68,7 +74,7 @@ def main():
         assert candle, "Every date should match"
         date_fill[key]["candle"] = candle
 
-    avg_usd = ord_usd = ord_btc = 0
+    buc_btc = avg_usd = ord_usd = ord_btc = 0
     for key, value in date_fill.items():
         usd = btc = 0
         for order in value["fills"]:
@@ -92,13 +98,28 @@ def main():
         ord_usd += usd
         ord_btc += btc
         avg_usd += avg_price * btc
+        buc_btc += 1 / avg_price
 
+    count = len(date_fill.keys())
     saved_usd = avg_usd - ord_usd
     saved_pct = saved_usd / avg_usd * 100
+    saved_dca = (ord_btc - (buc_btc * ord_usd / count)) / ord_btc * 100
+
     print(
-        f"Total: Bought {ord_btc:.8f} BTC for {ord_usd/ord_btc:.2f} instead of {avg_usd/ord_btc:.2f}, saving ${saved_usd:.2f} ({saved_pct:.2f}%)"
+        f"Total: Bought {ord_btc:.8f} BTC for {ord_usd/ord_btc:.2f} instead of {avg_usd/ord_btc:.2f}"
+    )
+    print(
+        f"   Saving {saved_pct:.4f}% (${saved_usd:.2f}) vs buy-on-avg, and {saved_dca:.4f}% vs dca-market-buy"
+    )
+    print(
+        f"   Saving {100-(ord_usd/ord_btc)/spot*100:.2f}% vs one-time market buy at current price of: {spot:.2f}"
     )
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    try:
+        main()
+    except Exception as e:
+        ex = e
+        breakpoint()

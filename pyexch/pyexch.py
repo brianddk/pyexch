@@ -84,7 +84,7 @@ def main():
         with open(args.params, "r") as pj:
             params = load(pj)
 
-    internals = ["my_ipv4", "my_ipv6", "new_uuid"]
+    internals = ["my_ipv4", "my_ipv6", "new_uuid", "dbg", "tick"]
 
     ex = Exchange.create(args.keystore, args.auth)
 
@@ -125,8 +125,14 @@ def main():
     if resp:
         print(dumps(resp, indent=2))
     elif ex._response is not None:
-        print("[ERROR] Last Response:", ex._response, file=stderr)
+        print("Last Response:", ex._response, file=stderr)
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    # Debug check
+    try:
+        main()
+    except Exception as e:
+        ex = e
+        breakpoint()
