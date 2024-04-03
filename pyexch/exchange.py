@@ -423,6 +423,7 @@ def data_toDict(data):
     # Requests.Response.content as <type 'str'> and other times as <type 'bytes'>.  This breaks
     # Requests.Response.json() since it expects 'bytes'
     # https://github.com/psf/requests/blob/d63e94f/src/requests/models.py#L942
+    # https://github.com/brianddk/pyexch/issues/11
     if type(data) is dict:
         return data
     if type(data) is Response:
