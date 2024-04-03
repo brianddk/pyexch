@@ -67,7 +67,7 @@ def main():
         # Check to see if we've deposited today
         #
         need_deposit = True
-        # bugbug: none of the pagination arguments are working on the list depsoits V2 URI
+        # https://github.com/brianddk/pyexch/issues/12
         resp = cboa.oa2_client.get_deposits(account_id)
         for deposit in resp["data"]:
             # if completed or created, process
