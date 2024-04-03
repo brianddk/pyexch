@@ -137,6 +137,7 @@ def main():
                 resp = cbv3.v3_client.cancel_orders(order_ids=params)
 
     # Get today's min_size and price for PRODID (BTC-USD)
+    #  https://github.com/brianddk/pyexch/issues/9
     #
     product = cbv3.v3_client.get_product(product_id=PRODID)
     if product["product_id"] == PRODID:
