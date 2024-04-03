@@ -54,6 +54,7 @@ def main():
     for order in fills["fills"]:
         if order["side"] != "BUY" or order["trade_type"] != "FILL":
             break
+        # https://github.com/brianddk/pyexch/issues/5
         try:
             dt = datetime.strptime(
                 order["trade_time"], "%Y-%m-%dT%H:%M:%S.%fZ"
