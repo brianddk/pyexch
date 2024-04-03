@@ -146,7 +146,8 @@ def main():
     assert account_id and min_size and spot
 
     # Get my available balance of WALTID (USD Wallet)
-    #
+    #  https://github.com/brianddk/pyexch/issues/10
+    # 
     adjust = 0.0 if DEPOSIT and need_deposit else THRESHOLD * dcausd
     target -= adjust
     while abs(balance - target) > 1 and balance < target:
@@ -218,7 +219,7 @@ def mk_order(cbv3, params, min_size):
                 if resp["success"]:
                     break
 
-    # breakpoint()
+    # https://github.com/brianddk/pyexch/issues/10
     if resp["success"]:
         for i in range(retry):
             try:
