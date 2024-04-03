@@ -319,6 +319,7 @@ class Coinbase(Exchange):
         # broke https://forums.coinbasecloud.dev/t/oauth-application-maximum-of-1-00-per-month/7096/13
         # Confirmed this meta tags allow to set the send limit.  Next is to try a send with CB-2FA-TOKEN
         # header: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/sign-in-with-coinbase-2fa
+        # https://github.com/brianddk/pyexch/issues/6
         if "wallet:transactions:send" in self.keystore.get("coinbase.oauth2.scope"):
             self._params.update(
                 {
