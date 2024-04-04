@@ -199,12 +199,10 @@ class Coinbase(Exchange):
 
     def get(self, uri, params=None):
         self._response = None
-        trim_str = "https://api.coinbase.com"
-        uri = uri.replace(trim_str, "")
         if params:
             self._params = data_toDict(params)
         if self.keystore.get("default") == "coinbase.oauth2":
-            if trim_cmp(trim_str, uri, self.keystore.get("coinbase.oauth2.auth_url")):
+            if trim_cmp(uri, self.keystore.get("coinbase.oauth2.auth_url")):
                 self._response = self.oa2_auth()
                 self._response = (
                     dict(msg="REDACTED") if self._response else self._response
@@ -223,19 +221,15 @@ class Coinbase(Exchange):
     def post(self, uri, params=None):
         data = params
         self._response = None
-        trim_str = "https://api.coinbase.com"
-        uri = uri.replace(trim_str, "")
         if data:
             self._params = data_toDict(data)
         if self.keystore.get("default") == "coinbase.oauth2":
-            if trim_cmp(trim_str, uri, self.keystore.get("coinbase.oauth2.token_url")):
+            if trim_cmp(uri, self.keystore.get("coinbase.oauth2.token_url")):
                 self._response = self.oa2_refresh(force=True)
                 self._response = (
                     dict(msg="REDACTED") if self._response else self._response
                 )
-            elif trim_cmp(
-                trim_str, uri, self.keystore.get("coinbase.oauth2.revoke_url")
-            ):
+            elif trim_cmp(uri, self.keystore.get("coinbase.oauth2.revoke_url")):
                 self._response = self.oa2_revoke()
             else:
                 self._response = self.oa2_client._post(uri, data=data)
@@ -251,8 +245,6 @@ class Coinbase(Exchange):
     def put(self, uri, params=None):
         data = params
         self._response = None
-        trim_str = "https://api.coinbase.com"
-        uri = uri.replace(trim_str, "")
         if data:
             self._params = data_toDict(data)
         if self.keystore.get("default") == "coinbase.oauth2":
@@ -268,8 +260,6 @@ class Coinbase(Exchange):
 
     def delete(self, uri, params=None):
         self._response = None
-        trim_str = "https://api.coinbase.com"
-        uri = uri.replace(trim_str, "")
 
         # No CB endpoint is using params or data on delete
         #  If added back, remember to put it in the calls below.
@@ -311,23 +301,11 @@ class Coinbase(Exchange):
     def oa2_auth(self):
         # https://stackoverflow.com/a/49957974/4634229
         self._params = dict(
-            response_type="code",
             client_id=self.keystore.get("coinbase.oauth2.id"),
+            response_type="code",
+            redirect_url=self.keystore.get("coinbase.oauth2.redirect_url"),
             scope=self.keystore.get("coinbase.oauth2.scope"),
         )
-        # rule  https://forums.coinbasecloud.dev/t/walletsend-is-limited-1-00-day-per-user/866/2
-        # broke https://forums.coinbasecloud.dev/t/oauth-application-maximum-of-1-00-per-month/7096/13
-        # Confirmed this meta tags allow to set the send limit.  Next is to try a send with CB-2FA-TOKEN
-        # header: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/sign-in-with-coinbase-2fa
-        # https://github.com/brianddk/pyexch/issues/6
-        if "wallet:transactions:send" in self.keystore.get("coinbase.oauth2.scope"):
-            self._params.update(
-                {
-                    "meta[send_limit_amount]": 1,
-                    "meta[send_limit_currency]": "USD",
-                    "meta[send_limit_period]": "day",
-                }
-            )
         req = PreparedRequest()
         req.prepare_url(self.keystore.get("coinbase.oauth2.auth_url"), self._params)
 
@@ -442,7 +420,9 @@ def data_toDict(data):
             return dict()
 
 
-def trim_cmp(trim_str, str_a, str_b):
-    str_a = str_a.replace(trim_str, "")
-    str_b = str_b.replace(trim_str, "")
+def trim_cmp(str_a, str_b):
+    trim_api = "https://api.coinbase.com"
+    trim_log = "https://login.coinbase.com"
+    str_a = str_a.replace(trim_api, "").replace(trim_log, "")
+    str_b = str_b.replace(trim_api, "").replace(trim_log, "")
     return str_a == str_b

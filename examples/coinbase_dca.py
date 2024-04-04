@@ -13,13 +13,14 @@ HOUR = 60 * 60  # one-hr in seconds
 
 DEPOSIT = True
 CANCEL_OPEN = True
-TAKER = 0.01  # do some taker action
-SPREAD = 0.05  # do buys 1% above to 5% below (peanut butter spread)
+TAKER = 0.001  # do some taker action
+SPREAD = 0.005  # do buys .1% above to .5% below (peanut butter spread)
 THRESHOLD = 0.95  # Percent of holds to clear before starting
 MKRFEE = 0.0060  # fee for maker limit orders
 TKRFEE = 0.0080  # fee for taker limit orders
 DCAUSD = 10.00  # USD to deposit on our DCAs
 DEPSOIT_DELAY = 12 * HOUR  # If we've deposited in the last 12hrs, skip
+REDUCE_TAKER = False
 
 MAXCNT = 500  # 500 The maximum number of orders allowed
 MAXCAN = 100  # 100 The maximum number of orders to cancel
@@ -148,7 +149,7 @@ def main():
 
     # Get my available balance of WALTID (USD Wallet)
     #  https://github.com/brianddk/pyexch/issues/10
-    # 
+    #
     adjust = 0.0 if DEPOSIT and need_deposit else THRESHOLD * dcausd
     target -= adjust
     while abs(balance - target) > 1 and balance < target:
@@ -213,8 +214,9 @@ def mk_order(cbv3, params, min_size):
         if resp["success"]:
             break
         if resp["error_response"]["error"] == "INVALID_LIMIT_PRICE_POST_ONLY":
-            # params.update(dict(post_only=False, base_size=f"{min_size:.8f}"))
             params.update(dict(post_only=False))
+            if REDUCE_TAKER:
+                params.update(dict(base_size=f"{min_size:.8f}"))
             for j in range(retry):
                 resp = cbv3.v3_client.limit_order_gtc_buy(**params)
                 if resp["success"]:
@@ -239,11 +241,12 @@ def mk_size(price, count, step, balance, spot, min_size):
     price_hi = price
     price_lo = price - step * (count - 1)
     price_av = (price_hi + price_lo) / 2
+    size = (balance - count / 100) / count / (price_av * (1 + MKRFEE))
     if price > spot:
-        size = min_size
+        if REDUCE_TAKER:
+            size = min_size
         cost = size * spot * (1 + TKRFEE)
     else:
-        size = (balance - count / 100) / count / (price_av * (1 + MKRFEE))
         cost = size * price * (1 + MKRFEE)
     return (size, cost)
 
@@ -253,5 +256,12 @@ if __name__ == "__main__":
     try:
         cboa = main()
     except Exception as e:
+        import traceback
+
+        print(
+            traceback.format_exc(),
+            "\n#### Debugger (q) to quit ####",
+            "\n#### Exception in object (ex) ####",
+        )
         ex = e
         breakpoint()

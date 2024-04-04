@@ -21,10 +21,10 @@
     // Aquire from "My OAuth2 Applications" at https://www.coinbase.com/settings/api
     "oauth2": {
       
-      // The URLs for new authorizations, token refresh, and revocation.  Use "api." not "www."
-      "auth_url": "https://api.coinbase.com/oauth/authorize",
-      "token_url": "https://api.coinbase.com/oauth/token",
-      "revoke_url": "https://api.coinbase.com/oauth/revoke",
+      // The URLs for new authorizations, token refresh, and revocation.  Older `api` urls work too.
+      "auth_url": "https://login.coinbase.com/oauth2/auth",
+      "token_url": "https://login.coinbase.com/oauth2/token",
+      "revoke_url": "https://login.coinbase.com/oauth2/revoke",
       
       // This will be the URL that pyexch will attempt to host a callback server at
       "redirect_url": "http://localhost:8000/callback",

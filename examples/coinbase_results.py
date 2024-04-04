@@ -122,5 +122,12 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
+        import traceback
+
+        print(
+            traceback.format_exc(),
+            "\n#### Debugger (q) to quit ####",
+            "\n#### Exception in object (ex) ####",
+        )
         ex = e
         breakpoint()

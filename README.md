@@ -37,6 +37,19 @@ is assumed if "--keystore" is not named
 - [ ] Add Kraken as a supported Exchange
 - [ ] Add Binance as a supported Exchange (from USA ?!?)
 
+## Getting Started
+
+This utility is a very thin wrapper around two published Coinbase libraries, though one or both are likely no longer maintained.  The first library [coinbase-python][q] uses both the v2-api, and the OAuth2-api.  The second libary [coinbase-advanced-py][r] uses the v3-api.  As of [April 2nd, 2024][s] you can access all the V2 and V3 URLs using either the [v3-api keys][t] or the [OAuth2-api keys][u].  Note that since certain convenience routines like `get_transaction` are not in the v3-api library, some may still opt to make an OAuth2 token to use these convenience calls.  Alternatively you could go directly after the URLs for these services which will work regardless.
+
+Here's a breakdown of what you will need to do to get started:
+
+1. Make either a [V3-API key][t], an [OAuth2-API key][u], or both.
+2. Read the [V2-API docs][w], aka "Sign In With Coinbase" (SIWC) for URLs/endpoints
+3. Read the [V3-API docs][x], aka "Advanced Trading" (AT) for URLs/endpoints
+4. Read the [V2-Library docs][y] for names of convenience calls / routines
+5. Read the [V3-Library docs][z] for names of convenience calls / routines
+6. Optionally read the [Python 3.12 Tutorial][0] for python questions
+
 ## Install and Initial Setup
 
 This utility allows you to use a Cryptocurrency Exchange's REST API to perform basic tasks and retrieve current and historical account data.  You will need to setup API / OAuth2 access keys in your account to use this utility.  The utility supports both GPG and Trezor-CipherKeyValue encryption.  You will need either a GPG key pair installed, or a Trezor attached.  As a fallback you can store API keys in naked JSON, but that is obviously not recommended.
@@ -60,7 +73,7 @@ To install the most recent edition directly from GitHub tarball:
 pip install https://github.com/brianddk/pyexch/archive/refs/heads/main.tar.gz
 ```
 
-You won't get to documentation or templates, but all the code will land and function 
+You won't get to documentation or templates, but all the code will land and function
 
 ### Install last release from PIP
 
@@ -71,7 +84,7 @@ Alternatively you can run it in module mode (`python -m pyexch --help`) or run t
 
 ## Building a Keystore
 
-If you decide to use a naked JSON, you can simply modify the `null` values in the `json_ks.json` to fill in the key values.  If you want to use encryption you will need to modify on of the encryption templates (`trezor_ks.json` or `gnupg_ks.json`) and update the unencrypted parameters.  These all deal with various encryption settings.  Note that for Trezor, `zlib` is the ONLY supported compression.  Since the JSON keystore is self explanatory, I'll focus on building the encrypted keystores.
+Template keystores are provided in the [templates][v] directory.  If you decide to use a naked JSON, you can simply modify the `null` values in the `json_ks.json` to fill in the key values.  If you want to use encryption you will need to modify on of the encryption templates (`trezor_ks.json` or `gnupg_ks.json`) and update the unencrypted parameters.  These all deal with various encryption settings.  Note that for Trezor, `zlib` is the ONLY supported compression.  Since the JSON keystore is self explanatory, I'll focus on building the encrypted keystores.
 
 ### Building a GnuPG encrypted Keystore:
 
@@ -99,9 +112,9 @@ Template:
   "format": "json",
   "coinbase": {
     "oauth2": {
-      "auth_url": "https://api.coinbase.com/oauth/authorize",
-      "token_url": "https://api.coinbase.com/oauth/token",
-      "revoke_url": "https://api.coinbase.com/oauth/revoke",
+      "auth_url": "https://login.coinbase.com/oauth/auth",
+      "token_url": "https://login.coinbase.com/oauth2/token",
+      "revoke_url": "https://login.coinbase.com/oauth2/revoke",
       "redirect_url": "http://localhost:8000/callback",
       "scope": "wallet:user:read,wallet:accounts:read",
       "id": null,
@@ -185,7 +198,7 @@ These endpoints are supported when using the `--auth` value of `coinbase.oauth2`
 These endpoints are supported when using the `--auth` value of either `coinbase.oauth2` or `coinbase.v2_api`.  These are exposed from the [coinbase.wallet.client.OAuthClient][h] and [coinbase.wallet.client.Client][i] client objects.  All of these calls accept named parameters pulled from --params JSON.
 
 - `_get` - Private client method that passes directly through to [requests object][j].
-- `_post` - Private client method that passes directly through to [requests object][j]. 
+- `_post` - Private client method that passes directly through to [requests object][j].
 - `_put` - Private client method that passes directly through to [requests object][j].
 - `_delete` - Private client method that passes directly through to [requests object][j].
 - `buy` -See [client documentation][k] for details.
@@ -194,7 +207,7 @@ These endpoints are supported when using the `--auth` value of either `coinbase.
 - `commit_deposit` -See [client documentation][k] for details.
 - `commit_sell` -See [client documentation][k] for details.
 - `commit_withdrawal` -See [client documentation][k] for details.
-- `complete_request` -See [client documentation][k] for details. 
+- `complete_request` -See [client documentation][k] for details.
 - `create_account` -See [client documentation][k] for details.
 - `create_address` -See [client documentation][k] for details.
 - `create_checkout` -See [client documentation][k] for details.
@@ -206,7 +219,7 @@ These endpoints are supported when using the `--auth` value of either `coinbase.
 - `get_account` -See [client documentation][k] for details.
 - `get_accounts` -See [client documentation][k] for details.
 - `get_address` -See [client documentation][k] for details.
-- `get_address_transactions` -See [client documentation][k] for details. 
+- `get_address_transactions` -See [client documentation][k] for details.
 - `get_addresses` -See [client documentation][k] for details.
 - `get_auth_info` -See [client documentation][k] for details.
 - `get_buy` -See [client documentation][k] for details.
@@ -218,7 +231,7 @@ These endpoints are supported when using the `--auth` value of either `coinbase.
 - `get_currencies` -See [client documentation][k] for details.
 - `get_current_user` -See [client documentation][k] for details.
 - `get_deposit` -See [client documentation][k] for details.
-- `get_deposits` -See [client documentation][k] for details. 
+- `get_deposits` -See [client documentation][k] for details.
 - `get_exchange_rates` -See [client documentation][k] for details.
 - `get_historic_prices` -See [client documentation][k] for details.
 - `get_merchant` -See [client documentation][k] for details.
@@ -230,7 +243,7 @@ These endpoints are supported when using the `--auth` value of either `coinbase.
 - `get_payment_methods` -See [client documentation][k] for details.
 - `get_primary_account` -See [client documentation][k] for details.
 - `get_report` -See [client documentation][k] for details.
-- `get_reports` -See [client documentation][k] for details. 
+- `get_reports` -See [client documentation][k] for details.
 - `get_sell` -See [client documentation][k] for details.
 - `get_sell_price` -See [client documentation][k] for details.
 - `get_sells` -See [client documentation][k] for details.
@@ -251,7 +264,7 @@ These endpoints are supported when using the `--auth` value of either `coinbase.
 - `transfer_money` -See [client documentation][k] for details.
 - `update_account` -See [client documentation][k] for details.
 - `update_current_user` -See [client documentation][k] for details.
-- `verify_callback` -See [client documentation][k] for details. 
+- `verify_callback` -See [client documentation][k] for details.
 - `withdraw` -See [client documentation][k] for details.
 
 ### coinbase.v3_api call endpoints
@@ -356,3 +369,15 @@ These endpoints are supported when using the `--auth` value of `coinbase.v3_api`
 [n]: https://stackoverflow.com/a/21928790/4634229
 [o]: https://stackoverflow.com/a/48175912/4634229
 [p]: https://github.com/coinbase/coinbase-python/?tab=readme-ov-file#market-data
+[q]: https://github.com/coinbase/coinbase-python/ (coinbase-python)
+[r]: https://github.com/coinbase/coinbase-advanced-py (coinbase-advanced-py)
+[s]: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/changelog#2024-apr-02 (april-2nd)
+[t]: https://portal.cloud.coinbase.com/access/api?keyType=trade&referrer=advanced_trade (v3-api-keys)
+[u]: https://www.coinbase.com/settings/api (oauth2-api-keys)
+[v]: templates
+[w]: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/welcome (siwc-spec)
+[x]: https://docs.cloud.coinbase.com/advanced-trade-api/docs/welcome (at-spec)
+[y]: https://github.com/coinbase/coinbase-python/?tab=readme-ov-file#usage (v2-lib-doc)
+[z]: https://coinbase.github.io/coinbase-advanced-py/ (v3-lib-doc)
+[0]: https://docs.python.org/3.12/tutorial/index.html (py3-tutorial)
+

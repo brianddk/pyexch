@@ -13,9 +13,14 @@
 - [x] Mask input on private data so it's is muted on screen
 - [x] Add python static analysis tool (flake8)
 - [x] Paginate fills on get_fills in DCA results
-- [ ] BugRpt that max_size has dropped to 0.00000001
-- [ ] BugRpt that retries are req to pull committed orders (see try in DCA)
+- [x] [BugRpt that max_size has dropped][p] to 0.00000001
+- [x] [BugRpt that retries are req to pull][o] committed orders (see try in DCA)
+- [x] [BugRpt `v3_api` auth on `/v2/user/auth`][n] which is supposed to work now (4-2)
+- [x] Test https://hackerone.com/reports/2441668 with new OAuth2 URL
+- [x] Test `transaction:send` using the new OAuth2 auth URL without "magic code"
 - [ ] Test Send Transaction with [CB-2FA-TOKEN][m] console prompting
+- [ ] Use v3 API for Send Transaction (easier).
+- [ ] Document in README that there is a better debug hook
 - [ ] Convert from setup.py to pyproject.toml
 - [ ] Add [AES encryption][h], or port samples to [CryptoDomeX][i]
 - [ ] Cleaner update of UID across all my GPG keys
@@ -69,9 +74,9 @@
 [k]: https://docs.readthedocs.io/en/stable/tutorial/index.html (RTD Tutorial)
 [l]: #publish-to-pypi
 [m]: https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/sign-in-with-coinbase-2fa
-[n]: 
-[o]: 
-[p]: 
+[n]: https://github.com/brianddk/pyexch/issues/13
+[o]: https://github.com/brianddk/pyexch/issues/10
+[p]: https://github.com/brianddk/pyexch/issues/9
 [q]: 
 [r]: 
 [s]: 
