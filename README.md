@@ -31,8 +31,6 @@ is assumed if "--keystore" is not named
 
 ## Future Plans
 
-- [x] Add PUT and DELETE methods for Coinbase (untested)
-- [x] Mask input on private data so it's is muted on screen
 - [ ] Add [AES encryption][n], or port samples to [CryptoDomeX][o]
 - [ ] Add Kraken as a supported Exchange
 - [ ] Add Binance as a supported Exchange (from USA ?!?)
