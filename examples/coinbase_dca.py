@@ -13,8 +13,8 @@ HOUR = 60 * 60  # one-hr in seconds
 
 DEPOSIT = True
 CANCEL_OPEN = True
-TAKER = 0.001  # do some taker action
-SPREAD = 0.005  # do buys .1% above to .5% below (peanut butter spread)
+SPREAD = 2 / 100  # do buys 2% below spot
+TAKER = 20 / 100 * SPREAD  # let 20% of orders go as takers
 THRESHOLD = 0.95  # Percent of holds to clear before starting
 MKRFEE = 0.0060  # fee for maker limit orders
 TKRFEE = 0.0080  # fee for taker limit orders
@@ -38,6 +38,7 @@ def main():
     cbv3 = Exchange.create("keystore.json", "coinbase.v3_api")
     cbv3.keystore.close()  # Trezor devices should only have one handle at a time
     cboa = Exchange.create("keystore.json", "coinbase.oauth2")
+    cboa.oa2_refresh()
 
     account_id = cboa.keystore.get("coinbase.state.usd_wallet")
     pmt_method_id = cboa.keystore.get("coinbase.state.ach_payment")
@@ -47,10 +48,7 @@ def main():
     if not account_id:
         resp = cbv3.v3_client.get_accounts()
         for account in resp["accounts"]:
-            if (
-                account["available_balance"]["currency"] == "USD"
-                and account["name"] == WALTID
-            ):
+            if account["available_balance"]["currency"] == "USD" and account["name"] == WALTID:
                 account_id = account["uuid"]
 
         assert account_id
@@ -75,14 +73,10 @@ def main():
             if "canceled" == deposit["status"] or not deposit["committed"]:
                 continue  # else skip
 
-            created = datetime.strptime(deposit["created_at"], ISOFMT).astimezone(
-                timezone.utc
-            )
+            created = datetime.strptime(deposit["created_at"], ISOFMT).astimezone(timezone.utc)
             # print(f"DBG: deposit['age_sec:{(current - created).total_seconds()}']:", deposit['id'])
             if (current - created).total_seconds() < DEPSOIT_DELAY:
-                print(
-                    f"Recent Deposit of {float(deposit['amount']['amount']):.2f} found @ {deposit['created_at']}"
-                )
+                print(f"Recent Deposit of {float(deposit['amount']['amount']):.2f} found @ {deposit['created_at']}")
                 need_deposit = False
                 break
 
@@ -112,9 +106,7 @@ def main():
                 currency="USD",
                 payment_method=pmt_method_id,
             )
-            print(
-                f"Created deposit of {float(resp['amount']['amount']):.2f} @ {resp['created_at']}"
-            )
+            print(f"Created deposit of {float(resp['amount']['amount']):.2f} @ {resp['created_at']}")
             # print(f"DBG: deposit['amt:{dcausd}']:", dumps(data_toDict(resp)))
 
     if CANCEL_OPEN:
@@ -123,11 +115,7 @@ def main():
         resp = cbv3.v3_client.list_orders(order_status=["OPEN"])
         params = []
         for order in resp["orders"]:
-            if (
-                order["status"] == "OPEN"
-                and order["product_id"] == PRODID
-                and order["side"] == "BUY"
-            ):
+            if order["status"] == "OPEN" and order["product_id"] == PRODID and order["side"] == "BUY":
                 params += [order["order_id"]]
 
         # Cancel the outstanding orders
@@ -162,8 +150,9 @@ def main():
 
     # price_hi = 66_857.20
     price_hi = spot * (1 + TAKER)
-    price_lo = price_hi * (1 - SPREAD)
+    price_lo = spot * (1 - SPREAD)
     price_av = (price_hi + price_lo) / 2
+
     count = min(int(balance / (min_size * price_av * (1 + MKRFEE))), MAXCNT)
     step = (price_hi - price_lo) / (count - 1)  # remember bookend math
     price = price_hi
@@ -186,9 +175,7 @@ def main():
         # balance -= cost
         cbal = balance - cost
         balance = get_balance(cbv3, account_id)
-        print(
-            f"{count} Limit buy of {params['base_size']} btc at {xprice:.2f}, at a cost of {cost:.2f}, leaving balance of {balance:.2f} ({cbal:.2f})"
-        )
+        print(f"{count} Limit buy of {params['base_size']} btc at {xprice:.2f}, at a cost of {cost:.2f}, leaving balance of {balance:.2f} ({cbal:.2f})")
         price -= step
         assert price and step and cost and balance
 
@@ -197,10 +184,7 @@ def main():
 
 def get_balance(cbv3, account_id):
     resp = cbv3._response = cbv3.v3_client.get_account(account_id)
-    if (
-        resp["account"]["available_balance"]["currency"] == "USD"
-        and resp["account"]["name"] == WALTID
-    ):
+    if resp["account"]["available_balance"]["currency"] == "USD" and resp["account"]["name"] == WALTID:
         balance = float(resp["account"]["available_balance"]["value"])
 
     assert account_id and balance
@@ -264,4 +248,4 @@ if __name__ == "__main__":
             "\n#### Exception in object (ex) ####",
         )
         ex = e
-        breakpoint()
+        breakpoint()  # main debug hook

@@ -13,7 +13,7 @@ from pyexch.exchange import Exchange  # , data_toDict
 
 MAKER = 0.006
 TAKER = 0.008
-COUNT = 400  # bugcheck ~3200, keep below that.
+COUNT = 3100  # bugcheck ~3200, keep below that.
 DAY_TICK = 24 * 60 * 60
 LIMIT = 100
 
@@ -59,12 +59,8 @@ def main():
     i = int(len(dip) * percent / 2)
     tdip = dip[i:-i]
     print(f"Regular average dip: {sum(dip)/len(dip) * 100:.4f}%")
-    print(
-        f"Trimmed ({percent*100:.0f}%, {2*i} of {len(dip)}) average dip: {sum(tdip)/len(tdip) * 100:.4f}%"
-    )
+    print(f"Trimmed ({percent*100:.0f}%, {2*i} of {len(dip)}) average dip: {sum(tdip)/len(tdip) * 100:.4f}%")
     print(f"Approximate median dip of: {dip[int(len(dip)/2)+1] * 100:.4f}%")
-
-    # breakpoint()
 
 
 if __name__ == "__main__":
@@ -80,4 +76,4 @@ if __name__ == "__main__":
             "\n#### Exception in object (ex) ####",
         )
         ex = e
-        breakpoint()
+        breakpoint()  # main debug hook

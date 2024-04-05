@@ -115,9 +115,7 @@ class Keystore:
             if "1" == self._tzclient.features.model:
                 assert len(zdec) <= 1024, "Trezor-1 cipherkv buffer limit"
             else:
-                assert (
-                    len(zdec) <= 2048
-                ), "Trezor-T/3 cipherkv buffer limit"  # T can go to 8k, but IDK T3?
+                assert len(zdec) <= 2048, "Trezor-T/3 cipherkv buffer limit"  # T can go to 8k, but IDK T3?
 
             # print("DBG: Length", len(zdec), )
 
@@ -168,9 +166,7 @@ class Keystore:
                 if "1" == self._tzclient.features.model:
                     assert len(enc) <= 1024, "Trezor-1 cipherkv buffer limit"
                 else:
-                    assert (
-                        len(enc) <= 2048
-                    ), "Trezor-T/3 cipherkv buffer limit"  # T can go to 8k, but IDK T3?
+                    assert len(enc) <= 2048, "Trezor-T/3 cipherkv buffer limit"  # T can go to 8k, but IDK T3?
 
                 key = self._keyfile["trezor"].get("key")
                 node = get_public_node(self._tzclient, path)
@@ -237,9 +233,7 @@ class Keystore:
             self._tzclient = TrezorClient(transport, ui, ses)
 
         if pen:
-            assert (
-                self._tzclient.features.passphrase_protection
-            ), "Passphrase requested in Keystore, but disabled on Trezor"
+            assert self._tzclient.features.passphrase_protection, "Passphrase requested in Keystore, but disabled on Trezor"
 
     def sort_keystore(self, json_file):
         self.save()
@@ -250,9 +244,7 @@ class Keystore:
         reordered_dict = sort_dict(self._keystore, template)
         after_len = len(dumps(reordered_dict))
 
-        assert (
-            before_len == after_len
-        ), "The length changed after the sort, something is now missing"
+        assert before_len == after_len, "The length changed after the sort, something is now missing"
         self._keystore = reordered_dict
         self.save(force=True)
 
@@ -265,9 +257,7 @@ class Keystore:
         reordered_dict = sort_dict(self._keyfile, template)
         after_len = len(dumps(reordered_dict))
 
-        assert (
-            before_len == after_len
-        ), "The length changed after the sort, something is now missing"
+        assert before_len == after_len, "The length changed after the sort, something is now missing"
         self._keyfile = reordered_dict
         self.save(force=True)
 

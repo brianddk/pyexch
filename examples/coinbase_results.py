@@ -56,13 +56,9 @@ def main():
             break
         # https://github.com/brianddk/pyexch/issues/5
         try:
-            dt = datetime.strptime(
-                order["trade_time"], "%Y-%m-%dT%H:%M:%S.%fZ"
-            ).replace(tzinfo=timezone.utc)
+            dt = datetime.strptime(order["trade_time"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
         except ValueError:
-            dt = datetime.strptime(order["trade_time"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                tzinfo=timezone.utc
-            )
+            dt = datetime.strptime(order["trade_time"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         key = dt.strftime("%Y-%m-%d")
         # date_fill[DATE][FILLS] = list()
         # date_fill[DATE][CANDEL] = candle
@@ -83,18 +79,10 @@ def main():
             # if order["liquidity_indicator"] == "MAKER":
             # fee = MAKER
             btc += float(order["size"])
-            usd += float(order["price"]) * float(order["size"]) + float(
-                order["commission"]
-            )
+            usd += float(order["price"]) * float(order["size"]) + float(order["commission"])
         ord_price = usd / btc
-        avg_price = (
-            (float(value["candle"]["open"]) + float(value["candle"]["close"]))
-            / 2
-            * (1 + TAKER)
-        )
-        print(
-            f"{key}: Bought {btc:.8f} BTC at {ord_price:.2f} instead of {avg_price:.2f}"
-        )
+        avg_price = (float(value["candle"]["open"]) + float(value["candle"]["close"])) / 2 * (1 + TAKER)
+        print(f"{key}: Bought {btc:.8f} BTC at {ord_price:.2f} instead of {avg_price:.2f}")
 
         ord_usd += usd
         ord_btc += btc
@@ -106,15 +94,9 @@ def main():
     saved_pct = saved_usd / avg_usd * 100
     saved_dca = (ord_btc - (buc_btc * ord_usd / count)) / ord_btc * 100
 
-    print(
-        f"Total: Bought {ord_btc:.8f} BTC for {ord_usd/ord_btc:.2f} instead of {avg_usd/ord_btc:.2f}"
-    )
-    print(
-        f"   Saving {saved_pct:.4f}% (${saved_usd:.2f}) vs buy-on-avg, and {saved_dca:.4f}% vs dca-market-buy"
-    )
-    print(
-        f"   Saving {100-(ord_usd/ord_btc)/spot*100:.2f}% vs one-time market buy at current price of: {spot:.2f}"
-    )
+    print(f"Total: Bought {ord_btc:.8f} BTC for {ord_usd/ord_btc:.2f} instead of {avg_usd/ord_btc:.2f}")
+    print(f"   Saving {saved_pct:.4f}% vs buy-on-avg, and {saved_dca:.4f}% vs dca-market-buy")
+    print(f"   Saving {100-(ord_usd/ord_btc)/spot*100:.2f}% vs one-time market buy at current price of: {spot:.2f}")
 
 
 if __name__ == "__main__":
@@ -130,4 +112,4 @@ if __name__ == "__main__":
             "\n#### Exception in object (ex) ####",
         )
         ex = e
-        breakpoint()
+        breakpoint()  # main debug hook

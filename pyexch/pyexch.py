@@ -37,32 +37,17 @@ def main():
 
     epilog = 'NOTE: Must name either "--call" or "--url", but not both, and "keystore.json" is assumed if "--keystore" is not named'
     parser = ArgumentParser(description="Python Exchange CLI (pyexch)", epilog=epilog)
-    parser.add_argument(
-        "--method",
-        metavar="<get,post,>",
-        default="get",
-        help="rest http method (get<default>,post,put,delete)",
-    )
-    parser.add_argument(
-        "--url", metavar="https://...", help="rest http url to perform actions upon"
-    )
-    parser.add_argument(
-        "--params",
-        metavar="params.json",
-        help="json(5) filename holding rest parameters / data",
-    )
-    parser.add_argument(
-        "--call", metavar="get_accounts", help="call method in the default client"
-    )
+    parser.add_argument("--method", metavar="<get,post,>", default="get", help="rest http method (get<default>,post,put,delete)")
+    parser.add_argument("--url", metavar="https://...", help="rest http url to perform actions upon")
+    parser.add_argument("--params", metavar="params.json", help="json(5) filename holding rest parameters / data")
+    parser.add_argument("--call", metavar="get_accounts", help="call method in the default client")
     parser.add_argument(
         "--keystore",
         metavar="ks.json",
         default="keystore.json",
         help="json(5) filename where secrets are stored (backup!)",
     )
-    parser.add_argument(
-        "--auth", metavar="exch.auth", help="the auth method to use from keystore."
-    )
+    parser.add_argument("--auth", metavar="exch.auth", help="the auth method to use from keystore.")
 
     args = parser.parse_args()
 
@@ -107,6 +92,7 @@ def main():
             # todo: clean this up, maybe mirror this guy as "ex.default_client" or something
             auth = ex.keystore.get("default")
             if auth == "coinbase.oauth2":
+                ex._response = ex.oa2_refresh()
                 client = ex.oa2_client
             elif auth == "coinbase.v2_api":
                 client = ex.v2_client
@@ -141,4 +127,4 @@ if __name__ == "__main__":
             "\n#### Exception in object (ex) ####",
         )
         ex = e
-        breakpoint()
+        breakpoint()  # main debug hook
