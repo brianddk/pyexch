@@ -13,9 +13,12 @@ from pyexch.exchange import Exchange  # , data_toDict
 
 MAKER = 0.006
 TAKER = 0.008
-COUNT = 3100  # bugcheck ~3200, keep below that.
+
+EARLIEST = 1437264000  # Sun Jul 19 2015 00:00:00 GMT
+EARLIEST = 1437428220  # Mon Jul 20 2015 21:37:00 GMT
+COUNT = 90
 DAY_TICK = 24 * 60 * 60
-LIMIT = 100
+LIMIT = 90
 
 
 def main():
@@ -24,7 +27,8 @@ def main():
     # pyexch --params params.json --auth coinbase.v3_api --url /api/v3/brokerage/products/BTC-USD/candles > candles.json
 
     now = int(time())
-    earlier = now - (min(LIMIT, COUNT) * DAY_TICK)
+    now -= now % DAY_TICK
+    earlier = now - (min(LIMIT, COUNT) * DAY_TICK) + DAY_TICK
 
     params = dict(
         product_id="BTC-USD",
@@ -33,11 +37,16 @@ def main():
         end=str(now),
     )
     candles = dict(candles=list())
-    while len(candles["candles"]) < COUNT:
+    length = 0
+    while length < COUNT:
         resp = cbv3.v3_client.get_candles(**params)
         candles["candles"] += resp["candles"]
+        length = len(candles["candles"])
         end = int(resp["candles"][-1]["start"]) - DAY_TICK
-        start = end - LIMIT * DAY_TICK
+        start = max(end - (LIMIT - 1) * DAY_TICK, EARLIEST)
+        if start >= end and length < COUNT:
+            print(f"At Earliest: {length}")
+            break
         params.update(
             dict(
                 start=str(start),

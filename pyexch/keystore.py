@@ -1,8 +1,8 @@
+import bz2
+import gzip
+import lzma
 from base64 import b64decode, b64encode
 from collections.abc import Mapping
-
-# from os import environ
-# from sys import stderr
 from copy import deepcopy
 from json import dump, dumps
 from random import getrandbits
@@ -68,7 +68,7 @@ class Keystore:
             self._tzclient.close()
             self._tzclient = None
 
-    def save(self, force=False):
+    def save(self, force=False, dbg=False):
         if self._dirty is False and force is False:
             return
 
@@ -112,10 +112,13 @@ class Keystore:
 
             # dict.json.zlib
             zdec = compress(bdec)
+            if dbg:
+                self._tzclient.close()
+                return f"zlib: {len(zdec)}\n" + f"gzip: {len(gzip.compress(bdec))}\n" + f"bz2:  {len(bz2.compress(bdec))}\n" + f"lzma: {len(lzma.compress(bdec))}"
             if "1" == self._tzclient.features.model:
                 assert len(zdec) <= 1024, "Trezor-1 cipherkv buffer limit"
             else:
-                assert len(zdec) <= 2048, "Trezor-T/3 cipherkv buffer limit"  # T can go to 8k, but IDK T3?
+                assert len(zdec) <= 8192, "Trezor-T/3 cipherkv buffer limit"  # T can go to 8k, but IDK T3?
 
             # print("DBG: Length", len(zdec), )
 
@@ -166,7 +169,7 @@ class Keystore:
                 if "1" == self._tzclient.features.model:
                     assert len(enc) <= 1024, "Trezor-1 cipherkv buffer limit"
                 else:
-                    assert len(enc) <= 2048, "Trezor-T/3 cipherkv buffer limit"  # T can go to 8k, but IDK T3?
+                    assert len(enc) <= 8192, "Trezor-T/3 cipherkv buffer limit"  # T can go to 8k, but IDK T3?
 
                 key = self._keyfile["trezor"].get("key")
                 node = get_public_node(self._tzclient, path)

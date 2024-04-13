@@ -9,6 +9,7 @@ import time
 import webbrowser
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from json import dumps
 from urllib.parse import parse_qs, urlparse
 from uuid import uuid4
 
@@ -17,7 +18,6 @@ from coinbase.rest import RESTClient  # coinbase_v3
 from coinbase.wallet.client import Client, OAuthClient  # coinbase_v2
 from pyjson5 import loads  # , Json5DecoderException
 
-# from json import dumps
 # from requests import JSONDecodeError
 from requests.auth import AuthBase
 from requests.models import PreparedRequest, Response
@@ -85,16 +85,22 @@ class CbV2Auth(AuthBase):
 
 
 class CbOa2Auth(AuthBase):
-    def __init__(self, token):
+    def __init__(self, token, token_2fa=None):
         self.token = token
+        self.token_2fa = token_2fa
 
     def __call__(self, request):
-        timestamp = str(int(time.time()))
+        # timestamp = str(int(time.time()))
+
+        if self.token_2fa:
+            request.headers.update({"CB-2FA-TOKEN": self.token_2fa})
 
         request.headers.update(
             {
-                "CB-ACCESS-TIMESTAMP": timestamp,
+                # "CB-ACCESS-TIMESTAMP": timestamp,
+                # "CB-VERSION": "2016-02-18",
                 "CB-VERSION": "2024-03-12",
+                "Accept": "application/json",
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + self.token,
             }
@@ -136,6 +142,9 @@ class Exchange:
     def dbg(self):
         token = self.keystore.get("coinbase.oauth2.token")
         return f"DBG: {token[:4]}...{token[-4:]}"
+
+    def zdbg(self):
+        return self.keystore.save(force=True, dbg=True)
 
     def tick(self):
         import time
@@ -215,6 +224,22 @@ class Coinbase(Exchange):
                 self._response = dict(msg="REDACTED") if self._response else self._response
             elif trim_cmp(uri, self.keystore.get("coinbase.oauth2.revoke_url")):
                 self._response = self.oa2_revoke()
+            elif "transactions" in uri[-13:]:
+                uri = self.trim_api + uri
+                needs_2fa = False
+                resp = self._response = requests.post(uri, auth=self.oa2_req_auth, json=data)
+                if 402 == resp.status_code:
+                    errors = resp.json()
+                    for error in errors["errors"]:
+                        if error["id"] == "two_factor_required":
+                            needs_2fa = True
+                            print(dumps(data_toDict(self._response), indent=2))
+                            break
+
+                if needs_2fa:
+                    token_2fa = input("Enter 2FA token: ")
+                    auth = CbOa2Auth(self.keystore.get("coinbase.oauth2.token"), token_2fa.strip())
+                    self._response = requests.post(uri, auth=auth, json=data)
             else:
                 self._response = self.oa2_refresh()
                 self._response = self.oa2_client._post(uri, data=data)

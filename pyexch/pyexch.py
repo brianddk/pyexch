@@ -69,7 +69,7 @@ def main():
         with open(args.params, "r") as pj:
             params = load(pj)
 
-    internals = ["my_ipv4", "my_ipv6", "new_uuid", "dbg", "tick"]
+    internals = ["my_ipv4", "my_ipv6", "new_uuid", "dbg", "tick", "zdbg"]
 
     ex = Exchange.create(args.keystore, args.auth)
 
